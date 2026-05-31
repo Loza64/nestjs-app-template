@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CloudinaryService } from 'src/integrations/cloudinary/cloudinary.service';
 import { paginate } from 'nestjs-typeorm-paginate';
-import { PaginationParse } from 'src/common/parser/pagination.parse';
+import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { Upload } from '../../domain/entity/upload.entity';
 import 'multer';
 
@@ -74,9 +74,9 @@ export class UploadService {
     return upload;
   }
 
-  async findBy(params: { page: number; size: number }): Promise<PaginationParse<Upload>> {
+  async findBy(params: { page: number; size: number }): Promise<PaginationParser<Upload>> {
     const result = await paginate<Upload>(this.uploadRepo, { page: params.page, limit: params.size });
 
-    return new PaginationParse<Upload>(result)
+    return new PaginationParser<Upload>(result)
   }
 }

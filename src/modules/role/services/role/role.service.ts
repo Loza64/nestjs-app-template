@@ -4,7 +4,7 @@ import { Role } from '../../domain/entities/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOptionsRelations, FindOptionsWhere, In, Repository } from 'typeorm';
 import { Permission } from 'src/modules/permission/domain/entities/permission.entity';
-import { PaginationParse } from 'src/common/parser/pagination.parse';
+import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
 
 @Injectable()
@@ -81,13 +81,13 @@ export class RoleService implements ICrudService<Role> {
     relations?: FindOptionsRelations<Role>;
     page: number;
     size: number;
-  }): Promise<PaginationParse<Role>> {
+  }): Promise<PaginationParser<Role>> {
     const result = await paginate<Role>(
       this.roleRepo,
       { page: params.page, limit: params.size },
       { where: params.filters, relations: params.relations },
     );
-    return new PaginationParse(result)
+    return new PaginationParser(result)
   }
 
   async count(

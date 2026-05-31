@@ -3,7 +3,7 @@ import { ICrudService } from 'src/common/service/crud.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/modules/role/domain/entities/role.entity';
 import { DeepPartial, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
-import { PaginationParse } from 'src/common/parser/pagination.parse';
+import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { User } from '../../domain/entity/user.entity';
 
@@ -74,13 +74,13 @@ export class UserService implements ICrudService<User> {
     relations?: FindOptionsRelations<User>;
     page: number;
     size: number;
-  }): Promise<PaginationParse<User>> {
+  }): Promise<PaginationParser<User>> {
     const result = await paginate<User>(
       this.userRepo,
       { page: params.page, limit: params.size },
       { where: params.filters, relations: params.relations },
     );
-    return new PaginationParse(result)
+    return new PaginationParser(result)
   }
 
   async count(

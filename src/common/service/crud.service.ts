@@ -4,7 +4,7 @@ import {
   FindOptionsWhere,
   ObjectLiteral,
 } from 'typeorm';
-import { PaginationParse } from '../parser/pagination.parse';
+import { PaginationParser } from '../parser/pagination.parser';
 
 export interface ICrudService<T extends ObjectLiteral> {
   create(data: DeepPartial<T>): Promise<T>;
@@ -16,6 +16,6 @@ export interface ICrudService<T extends ObjectLiteral> {
     relations?: FindOptionsRelations<T>;
     page: number;
     size: number;
-  }): Promise<PaginationParse<T>>;
+  }): Promise<PaginationParser<T>>;
   count(filters?: FindOptionsWhere<T> | FindOptionsWhere<T>[]): Promise<number>;
 }

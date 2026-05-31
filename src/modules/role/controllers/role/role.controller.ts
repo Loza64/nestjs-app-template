@@ -10,7 +10,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { RoleService } from '../../services/role/role.service';
-import { PaginationParse } from 'src/common/parser/pagination.parse';
+import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { Role } from '../../domain/entities/role.entity';
 import { CreateRoleDto } from '../../domain/dto/role-create.dto';
 import { UpdateRoleDto } from '../../domain/dto/role-update.dto';
@@ -22,7 +22,7 @@ export class RoleController {
   @Get()
   async findBy(
     @Query() query: Record<string, string>,
-  ): Promise<PaginationParse<Role>> {
+  ): Promise<PaginationParser<Role>> {
     const { page = '1', size = '50' } = query;
 
     const pageNumber = parseInt(page, 10);
