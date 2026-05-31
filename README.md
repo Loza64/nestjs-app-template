@@ -318,6 +318,101 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
 - `skipLibCheck`: `true`
 - `forceConsistentCasingInFileNames`: `true`
 
+## Documentación del código: cómo crear un servicio
+
+El proyecto incluye un patrón de servicio común basado en la interfaz `ICrudService<T>` que define los métodos CRUD estándar y paginación.
+
+- `src/common/service/crud.service.ts` define `ICrudService<T>`.
+- `src/common/entity/base.ts` define `BaseEntity` con campos comunes como `id`, `createdAt`, `updatedAt`, `deletedAt` y `isDeleted`.
+- `src/common/parser/pagination.parser.ts` convierte la salida de `nestjs-typeorm-paginate` en una respuesta uniforme.
+
+### Ejemplo de entidad base
+
+```ts
+import { Entity, Column } from 'typeorm';
+import { BaseEntity } from 'src/common/entity/base';
+
+@Entity('products')
+export class Product extends BaseEntity {
+  @Column({ type: 'varchar', nullable: false })
+  name: string = '';
+
+  @Column({ type: 'text', nullable: true })
+  description?: string;
+}
+```
+
+### Ejemplo de service siguiendo el patrón
+
+```ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DeepPartial, FindOptionsWhere, FindOptionsRelations } from 'typeorm';
+import { paginate } from 'nestjs-typeorm-paginate';
+import { ICrudService } from 'src/common/service/crud.service';
+import { PaginationParser } from 'src/common/parser/pagination.parser';
+import { Product } from './domain/entity/product.entity';
+
+@Injectable()
+export class ProductService implements ICrudService<Product> {
+  constructor(
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+  ) {}
+
+  async create(data: DeepPartial<Product>): Promise<Product> {
+    const entity = this.productRepo.create(data);
+    return this.productRepo.save(entity);
+  }
+
+  async update({ id, data }: { id: number; data: DeepPartial<Product> }): Promise<Product> {
+    const entity = await this.productRepo.findOneBy({ id });
+    if (!entity) throw new NotFoundException('Product not found');
+    Object.assign(entity, data);
+    return this.productRepo.save(entity);
+  }
+
+  async delete(id: number): Promise<Product> {
+    const entity = await this.productRepo.findOneBy({ id });
+    if (!entity) throw new NotFoundException('Product not found');
+    return this.productRepo.remove(entity);
+  }
+
+  async findOneBy(params: { filters: FindOptionsWhere<Product> | FindOptionsWhere<Product>[]; relations?: FindOptionsRelations<Product>; }): Promise<Product> {
+    const product = await this.productRepo.findOne({ where: params.filters, relations: params.relations });
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
+  }
+
+  async findBy(params: { filters: FindOptionsWhere<Product> | FindOptionsWhere<Product>[]; relations?: FindOptionsRelations<Product>; page: number; size: number; }): Promise<PaginationParser<Product>> {
+    const result = await paginate(this.productRepo, { page: params.page, limit: params.size }, { where: params.filters, relations: params.relations });
+    return new PaginationParser(result);
+  }
+
+  async count(filters?: FindOptionsWhere<Product> | FindOptionsWhere<Product>[]): Promise<number> {
+    return this.productRepo.count({ where: filters });
+  }
+}
+```
+
+### Cómo registrar el servicio en el módulo
+
+```ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProductService } from './services/product/product.service';
+import { Product } from './domain/entity/product.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Product])],
+  providers: [ProductService],
+  exports: [ProductService],
+})
+export class ProductModule {}
+```
+
+Este patrón es similar al de `UserService` en el proyecto. Mantiene la lógica de datos separada del controlador y centraliza las operaciones con TypeORM.
+
 ## Recomendaciones para desarrolladores
 
 - Revisar el uso de `synchronize: true` en `TypeOrmModule.forRootAsync`; sólo debe usarse en desarrollo.
