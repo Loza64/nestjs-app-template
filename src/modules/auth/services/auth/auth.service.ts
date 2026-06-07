@@ -32,7 +32,7 @@ export class AuthService {
 
     const hashedPassword = await this.cryptoService.encrypt(data.password);
 
-    const role = await this.roleRepo.findOne({ where: { id: 2 } });
+    const role = await this.roleRepo.findOne({ where: { id: 2 } }); //role user por defecto
 
     const user = this.userRepo.create({
       ...data,

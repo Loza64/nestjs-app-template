@@ -452,6 +452,39 @@ Este patrón es similar al de `UserService` en el proyecto. Mantiene la lógica 
 - `GET /api/uploads/:id`
 - `DELETE /api/uploads/:id`
 
+## Archivo `script.sql`
+
+El archivo `script.sql` se usa para inicializar datos básicos de autorización en la base de datos. Está diseñado para ejecutarse como un único script en PostgreSQL, dentro de una transacción.
+
+- Inserta dos roles en la tabla `roles`: `ADMIN` y `USER`.
+- Asigna a `ADMIN` todos los permisos disponibles de la tabla `permissions`.
+- Asigna a `USER` únicamente los permisos con método HTTP `GET`.
+- Usa `ON CONFLICT` para que el script sea idempotente y no falle si ya existen los registros.
+
+Importante:
+
+- El script no crea usuarios nuevos.
+- La sentencia `UPDATE users` simplemente asigna `role_id` de administrador al usuario con `id = 1`, si ese usuario ya existe.
+- Si quieres usar otro usuario como administrador, modifica el valor de `u.id` antes de ejecutar el script.
+- Las consultas `SELECT` al final son opcionales y sirven para verificar los resultados.
+
+### Cómo ejecutar el script
+
+1. Conecta a tu base de datos PostgreSQL.
+2. Ejecuta el script con una herramienta SQL o desde la terminal:
+
+```sh
+psql -U <usuario> -d <base_de_datos> -f script.sql
+```
+
+3. Si usas un cliente gráfico, simplemente abre `script.sql` y ejecútalo en la base de datos correspondiente.
+
+### Por qué es útil
+
+- Prepara el esquema de autorización necesario para que el guard de permisos funcione.
+- Permite probar acceso con un usuario administrador y un usuario estándar.
+- Facilita el desarrollo inicial sin tener que crear manualmente roles y asignaciones.
+
 ## Conclusión
 
 Este proyecto es una base sólida para un backend de administración de usuarios y archivos con permisos y roles. La documentación contiene la arquitectura principal, las tecnologías usadas, los módulos del dominio y las recomendaciones para desarrolladores.
