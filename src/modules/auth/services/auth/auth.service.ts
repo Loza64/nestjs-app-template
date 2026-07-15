@@ -101,7 +101,7 @@ export class AuthService {
   }
 
   async updatePassword(id: number, data: ChangePasswordDto): Promise<User> {
-    const user = await this.repo.findOne({ where: { id }, relations: { role: true } });
+    const user = await this.repo.findOne({ where: { id }, relations: { role: true, photo: true } });
     if (!user) throw new NotFoundException('User not found');
 
     const isValid = await this.cryptoService.compare(data.currentPassword, user.password);

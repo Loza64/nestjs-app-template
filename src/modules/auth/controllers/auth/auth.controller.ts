@@ -1,10 +1,15 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
 import { AuthService } from '../../services/auth/auth.service';
 import { plainToInstance } from 'class-transformer';
 import { AuthResponseDto } from '../../domain/dto/response.dto';
 import { User } from 'src/modules/user/domain/entity/user.entity';
 import { Profile } from 'src/common/decorators/profile';
-import { LoginDto, SignUpDto } from '../../domain/dto/payload.dto';
+import {
+  ChangePasswordDto,
+  LoginDto,
+  SignUpDto,
+  UpdateProfileDto,
+} from '../../domain/dto/payload.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,5 +30,21 @@ export class AuthController {
   @Get('profile')
   profile(@Profile() profile: User): User {
     return profile;
+  }
+
+  @Patch('profile')
+  async updateProfile(
+    @Profile() profile: User,
+    @Body() data: UpdateProfileDto,
+  ): Promise<User> {
+    return this.authService.updateProfile(profile.id, data);
+  }
+
+  @Patch('profile/password')
+  async updatePassword(
+    @Profile() profile: User,
+    @Body() data: ChangePasswordDto,
+  ): Promise<User> {
+    return this.authService.updatePassword(profile.id, data);
   }
 }
