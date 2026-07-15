@@ -3,6 +3,9 @@ FROM node:22-alpine AS builder
 RUN apk add --no-cache python3 make g++ libc6-compat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# Configuración para evitar el error TTY en entornos no interactivos (Docker)
+ENV CI=true
+
 WORKDIR /app
 
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
@@ -15,6 +18,7 @@ RUN pnpm test
 
 RUN pnpm build
 
+# Limpieza de dependencias de desarrollo
 RUN pnpm prune --prod
 
 FROM node:22-alpine AS runner
