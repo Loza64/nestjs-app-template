@@ -22,6 +22,7 @@ import { CreateUserDto, UpdateUserDto } from '../../domain/dto/payload.dto';
 import { Profile } from 'src/common/decorators/profile';
 import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
 import { CleanupOrphanPhotoInterceptor } from '../../interceptors/cleanup-orphan-photo/cleanup-orphan-photo.interceptor';
+import { UserMapper, UserResponseDto } from '../../domain/mappers/user.mapper';
 
 @Controller('users')
 export class UserController {
@@ -46,7 +47,7 @@ export class UserController {
     const filters = parseSearch<User>(search, ['name', 'email', 'username', 'surname'], baseFilter);
     const order = parseSort<User>(sort, ['id', 'name', 'email', 'createdAt', 'username']);
 
-    return this.usersService.findBy({
+    const result = await this.usersService.findBy({
       withDeleted: isDeleted,
       filters,
       relations: { role: true, photo: true },
@@ -54,24 +55,28 @@ export class UserController {
       size,
       order,
     });
+
+    return UserMapper.toPaginatedResponse(result);
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.usersService.findOneBy({
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
+    const user = await this.usersService.findOneBy({
       filters: { id },
       relations: {
         role: true,
         photo: true
       },
     });
+    return UserMapper.toResponse(user);
   }
 
   @UseInterceptors(CleanupOrphanPhotoInterceptor)
   @Post()
-  async create(@Body() dto: CreateUserDto): Promise<User> {
-    return this.usersService.create(dto);
+  async create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
+    const user = await this.usersService.create(dto);
+    return UserMapper.toResponse(user);
   }
 
   @UseInterceptors(CleanupOrphanPhotoInterceptor)
@@ -81,18 +86,20 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateUserDto,
     @Profile() profile: User,
-  ): Promise<User> {
+  ): Promise<UserResponseDto> {
     this.preventSelfAction(id, profile);
-    return this.usersService.update({ id, data });
+    const user = await this.usersService.update({ id, data });
+    return UserMapper.toResponse(user);
   }
 
   @Delete(':id')
   async delete(
     @Param('id', ParseIntPipe) id: number,
     @Profile() profile: User,
-  ): Promise<User> {
+  ): Promise<UserResponseDto> {
     this.preventSelfAction(id, profile);
-    return this.usersService.delete(id);
+    const user = await this.usersService.delete(id);
+    return UserMapper.toResponse(user);
   }
 
   @Patch(':id/soft-delete')
@@ -100,14 +107,16 @@ export class UserController {
   async softDelete(
     @Param('id', ParseIntPipe) id: number,
     @Profile() profile: User,
-  ): Promise<User> {
+  ): Promise<UserResponseDto> {
     this.preventSelfAction(id, profile);
-    return this.usersService.softDelete(id);
+    const user = await this.usersService.softDelete(id);
+    return UserMapper.toResponse(user);
   }
 
   @Patch(':id/restore')
   @HttpCode(HttpStatus.OK)
-  async restore(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.usersService.softRestore(id);
+  async restore(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
+    const user = await this.usersService.softRestore(id);
+    return UserMapper.toResponse(user);
   }
 }

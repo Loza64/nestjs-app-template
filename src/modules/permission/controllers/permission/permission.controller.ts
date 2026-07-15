@@ -1,6 +1,7 @@
 import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PermissionService } from '../../services/permission/permission.service';
 import { PermissionUpdateDto } from '../../domain/dto/permision.update.dto';
+import { PermissionMapper, PermissionResponseDto } from '../../domain/mappers/permission.mapper';
 
 @Controller('/permissions')
 export class PermissionController {
@@ -12,13 +13,15 @@ export class PermissionController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('size', new DefaultValuePipe(10), ParseIntPipe) size: number,
   ) {
-    return this.service.findBy({ filters: {}, page, size });
+    const result = await this.service.findBy({ filters: {}, page, size });
+    return PermissionMapper.toPaginatedResponse(result);
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOneBy({ filters: { id } });
+  async getOne(@Param('id', ParseIntPipe) id: number): Promise<PermissionResponseDto> {
+    const permission = await this.service.findOneBy({ filters: { id } });
+    return PermissionMapper.toResponse(permission);
   }
 
   @Put(':id')
@@ -27,7 +30,8 @@ export class PermissionController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() data: PermissionUpdateDto,
-  ) {
-    return this.service.update({ id, data });
+  ): Promise<PermissionResponseDto> {
+    const permission = await this.service.update({ id, data });
+    return PermissionMapper.toResponse(permission);
   }
 }

@@ -1,11 +1,6 @@
-import { Expose, Type } from 'class-transformer';
-import { User } from 'src/modules/user/domain/entity/user.entity';
+import { UserResponseDto } from 'src/modules/user/domain/mappers/user.mapper';
 
 export class AuthResponseDto {
-  @Expose()
   token?: string;
-
-  @Expose()
-  @Type(() => User)
-  data: User | null = null;
+  data: UserResponseDto | null = null;
 }

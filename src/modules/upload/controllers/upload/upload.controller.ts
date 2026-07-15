@@ -15,10 +15,9 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { UploadService } from '../../services/upload/upload.service';
-import { Upload } from '../../domain/entity/upload.entity';
-import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { UploadInterceptor } from 'src/common/interceptors/upload/upload.interceptor';
 import { CreateUploadDto } from '../../domain/dto/create.dto';
+import { UploadMapper, UploadResponseDto } from '../../domain/mappers/upload.mapper';
 
 @Controller('uploads')
 export class UploadController {
@@ -32,8 +31,9 @@ export class UploadController {
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: CreateUploadDto,
-  ) {
-    return this.uploadService.uploadFile(file, body.tags);
+  ): Promise<UploadResponseDto> {
+    const upload = await this.uploadService.uploadFile(file, body.tags);
+    return UploadMapper.toResponse(upload);
   }
 
   @Post('/many')
@@ -44,25 +44,29 @@ export class UploadController {
   async uploadManyFile(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() body: CreateUploadDto,
-  ): Promise<Upload[]> {
-    return this.uploadService.uploadManyFiles(files, body.tags);
+  ): Promise<UploadResponseDto[]> {
+    const uploads = await this.uploadService.uploadManyFiles(files, body.tags);
+    return UploadMapper.toResponseList(uploads);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async deleteFile(@Param('id') id: number): Promise<Upload> {
-    return this.uploadService.deleteFile(id);
+  async deleteFile(@Param('id') id: number): Promise<UploadResponseDto> {
+    const upload = await this.uploadService.deleteFile(id);
+    return UploadMapper.toResponse(upload);
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async findById(@Param('id') id: number): Promise<Upload> {
-    return this.uploadService.findById(id);
+  async findById(@Param('id') id: number): Promise<UploadResponseDto> {
+    const upload = await this.uploadService.findById(id);
+    return UploadMapper.toResponse(upload);
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(@Query('page') page = 1, @Query('size') size = 10): Promise<PaginationParser<Upload>> {
-    return this.uploadService.findBy({ page: Number(page), size: Number(size) });
+  async findAll(@Query('page') page = 1, @Query('size') size = 10) {
+    const result = await this.uploadService.findBy({ page: Number(page), size: Number(size) });
+    return UploadMapper.toPaginatedResponse(result);
   }
 }
