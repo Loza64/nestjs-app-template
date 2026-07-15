@@ -7,11 +7,11 @@ export class Permission {
   id: number = 0;
 
   @Column({ type: 'varchar' })
-  path: string = '';
+  path!: string;
 
   @Column({ type: 'varchar' })
-  method: string = '';
+  method!: string;
 
   @Column({ type: 'varchar', nullable: true })
-  title?: string;
+  title!: string | null;
 }

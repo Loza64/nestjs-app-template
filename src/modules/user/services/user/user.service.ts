@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ICrudService } from 'src/common/service/crud.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
@@ -19,7 +19,7 @@ export class UserService implements ICrudService<User, CreateUserDto, UpdateUser
 
   async create(data: CreateUserDto): Promise<User> {
     const existing = await this.repo.findOne({ where: [{ username: data.username }, { email: data.email }] });
-    if (existing) throw new NotFoundException('Username o email ya están en uso');
+    if (existing) throw new ConflictException('Username o email ya están en uso');
 
     const hashedPassword = await this.cryptoService.encrypt(data.password);
     const user = this.repo.create({ ...data, password: hashedPassword });
@@ -29,13 +29,10 @@ export class UserService implements ICrudService<User, CreateUserDto, UpdateUser
   async update({ id, data }: { id: number; data: UpdateUserDto }): Promise<User> {
     const user = await this.findOneBy({ filters: { id }, relations: { photo: true } });
     const { photo: newPhoto, ...rest } = data;
-
     Object.assign(user, rest);
     const oldPhotoId = user.photo?.id;
-
     if (newPhoto) user.photo = { id: newPhoto.id } as User['photo'];
     const savedUser = await this.repo.save(user);
-
     if (newPhoto?.id && oldPhotoId && newPhoto.id !== oldPhotoId) await this.upload.deleteFile(oldPhotoId)
     return savedUser;
   }

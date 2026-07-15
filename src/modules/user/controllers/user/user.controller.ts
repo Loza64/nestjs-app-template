@@ -49,7 +49,7 @@ export class UserController {
     return this.usersService.findBy({
       withDeleted: isDeleted,
       filters,
-      relations: { role: true },
+      relations: { role: true, photo: true },
       page,
       size,
       order,
@@ -63,6 +63,7 @@ export class UserController {
       filters: { id },
       relations: {
         role: true,
+        photo: true
       },
     });
   }

@@ -17,19 +17,19 @@ export class User extends BaseEntity {
   photo: Upload | null = null;
 
   @Column({ type: 'varchar', unique: true, nullable: false })
-  username: string = '';
+  username!: string;
 
   @Column({ type: 'varchar', nullable: false })
-  name: string = '';
+  name!: string;
 
   @Column({ type: 'varchar', nullable: false })
-  surname: string = '';
+  surname!: string;
 
   @Column({ type: 'varchar', unique: true, nullable: false })
-  email: string = '';
+  email!: string;
 
   @Column({ type: 'varchar', nullable: false })
-  password: string = '';
+  password!: string;
 
   @Column({ type: 'boolean', default: false })
   blocked: boolean = false;

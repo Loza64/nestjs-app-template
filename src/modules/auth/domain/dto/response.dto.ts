@@ -3,7 +3,7 @@ import { User } from 'src/modules/user/domain/entity/user.entity';
 
 export class AuthResponseDto {
   @Expose()
-  token: string = '';
+  token?: string;
 
   @Expose()
   @Type(() => User)

@@ -9,22 +9,22 @@ export class Upload extends BaseEntity {
   user: User | null = null;
 
   @Column({ type: 'varchar', unique: true, nullable: false })
-  publicId: string = '';
+  publicId!: string;
 
   @Column({ type: 'varchar', nullable: false })
-  url: string = '';
+  url!: string;
 
   @Column({ type: 'varchar', nullable: false })
-  secureUrl: string = '';
+  secureUrl!: string;
 
   @Column({ type: 'varchar', nullable: true })
-  resourceType: string = '';
+  resourceType!: string;
 
   @Column({ type: 'varchar', nullable: true })
-  format: string = '';
+  format!: string;
 
   @Column({ type: 'varchar', nullable: true })
-  originalFilename: string = '';
+  originalFilename!: string;
 
   @Column({ type: 'integer', nullable: true })
   width: number | null = null;

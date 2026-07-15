@@ -29,19 +29,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(status).json({ status, message });
   }
 
-  private getStatusAndMessage(
-    exception: unknown,
-  ): { status: number; message: string } {
+  private getStatusAndMessage(exception: unknown): { status: number; message: string } {
 
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const res = exception.getResponse();
 
-      const message = this.extractMessage(
-        this.isHttpResponseWithMessage(res)
-          ? res
-          : { message: this.stringifyResponse(res) },
-      );
+      const message = this.extractMessage(this.isHttpResponseWithMessage(res) ? res : { message: this.stringifyResponse(res) });
 
       return { status, message };
     }
