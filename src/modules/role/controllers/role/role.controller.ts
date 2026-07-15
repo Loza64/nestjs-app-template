@@ -15,8 +15,7 @@ import {
 import { RoleService } from '../../services/role/role.service';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { Role } from '../../domain/entities/role.entity';
-import { CreateRoleDto } from '../../domain/dto/role-create.dto';
-import { UpdateRoleDto } from '../../domain/dto/role-update.dto';
+import { CreateRoleDto, UpdateRoleDto } from '../../domain/dto/payload.dto';
 import BaseQuerys from 'src/common/dto/base-querys.dto';
 import { FindOptionsWhere, IsNull, Not } from 'typeorm';
 import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';

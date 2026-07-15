@@ -2,84 +2,74 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ICrudService } from 'src/common/service/crud.service';
 import { Role } from '../../domain/entities/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, In, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, In, Repository } from 'typeorm';
 import { Permission } from 'src/modules/permission/domain/entities/permission.entity';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
+import { CreateRoleDto, UpdateRoleDto } from '../../domain/dto/payload.dto';
+import { PermissionService } from 'src/modules/permission/services/permission/permission.service';
 
 @Injectable()
-export class RoleService implements ICrudService<Role> {
+export class RoleService implements ICrudService<Role, CreateRoleDto, UpdateRoleDto> {
   constructor(
     @InjectRepository(Role)
-    private readonly roleRepo: Repository<Role>,
-    @InjectRepository(Permission)
-    private readonly permRepo: Repository<Permission>,
+    private readonly repo: Repository<Role>,
+    private readonly permissionService: PermissionService,
   ) { }
 
-  async create(
-    data: DeepPartial<Role> & { permissions?: { id: number }[] },
-  ): Promise<Role> {
-    let permissions: Permission[] = [];
-
-    if (data.permissions?.length) {
-      const ids = data.permissions.map((p) => p.id);
-      permissions = await this.permRepo.findBy({ id: In(ids) });
-      if (permissions.length !== ids.length)
-        throw new NotFoundException('Some permissions not found');
-    }
-
-    const role = this.roleRepo.create({ ...data, permissions });
-    return this.roleRepo.save(role);
+  private async resolvePermissions(ids: number[]): Promise<Permission[]> {
+    if (!ids.length) return [];
+    const permissionPage = await this.permissionService.findBy({
+      filters: { id: In(ids) },
+      page: 1,
+      size: ids.length,
+    });
+    if (permissionPage.data.length !== ids.length)
+      throw new NotFoundException('Some permissions not found');
+    return permissionPage.data;
   }
 
-  async update({
-    id,
-    data,
-  }: {
-    id: number;
-    data: DeepPartial<Role> & { permissions?: { id: number }[] };
-  }): Promise<Role> {
-    const role = await this.roleRepo.findOne({ where: { id }, relations: { permissions: true } });
-    if (!role) throw new NotFoundException('Role not found');
+  async create(data: CreateRoleDto): Promise<Role> {
+    const ids = data.permissions?.map((p) => p.id) ?? [];
+    const permissions = await this.resolvePermissions(ids);
+    const role = this.repo.create({ ...data, permissions });
+    return this.repo.save(role);
+  }
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (key !== 'permissions' && value !== undefined)
-        role[key] = value ?? role[key];
-    });
-
-    if (data.permissions) {
-      const ids = data.permissions.map((p) => p.id);
-      const permissions = await this.permRepo.findBy({ id: In(ids) });
-      if (permissions.length !== ids.length)
-        throw new NotFoundException('Some permissions not found');
-      role.permissions = permissions;
+  async update({ id, data }: { id: number; data: UpdateRoleDto }): Promise<Role> {
+    const role = await this.findOneBy({ filters: { id }, relations: { permissions: true } });
+    const { permissions: permissionsDto, ...rest } = data;
+    Object.assign(role, rest);
+    if (permissionsDto) {
+      const ids = permissionsDto.map((p) => p.id);
+      role.permissions = await this.resolvePermissions(ids);
     }
 
-    return this.roleRepo.save(role);
+    return this.repo.save(role);
   }
 
   async delete(id: number): Promise<Role> {
     const role = await this.findOneBy({ filters: { id } });
-    await this.roleRepo.remove(role);
+    await this.repo.remove(role);
     return role;
   }
 
   async softDelete(id: number): Promise<Role> {
-    await this.roleRepo.softDelete(id);
-    return await this.roleRepo.findOneOrFail({ where: { id }, withDeleted: true });
+    await this.repo.softDelete(id);
+    return await this.repo.findOneOrFail({ where: { id }, withDeleted: true });
   }
 
   async softRestore(id: number): Promise<Role> {
-    const result = await this.roleRepo.restore(id);
+    const result = await this.repo.restore(id);
     if (!result.affected) throw new NotFoundException(`Role ${id} no existe`);
-    return await this.roleRepo.findOneByOrFail({ id });
+    return await this.repo.findOneByOrFail({ id });
   }
 
   async findOneBy(params: {
     filters: FindOptionsWhere<Role> | FindOptionsWhere<Role>[];
     relations?: FindOptionsRelations<Role>;
   }): Promise<Role> {
-    const role = await this.roleRepo.findOne({
+    const role = await this.repo.findOne({
       where: params.filters,
       relations: params.relations,
     });
@@ -96,16 +86,14 @@ export class RoleService implements ICrudService<Role> {
     withDeleted?: boolean;
   }): Promise<PaginationParser<Role>> {
     const result = await paginate<Role>(
-      this.roleRepo,
+      this.repo,
       { page: params.page, limit: params.size },
       { where: params.filters, relations: params.relations, order: params.order, withDeleted: params.withDeleted },
     );
-    return new PaginationParser(result)
+    return new PaginationParser(result);
   }
 
-  async count(
-    filters?: FindOptionsWhere<Role> | FindOptionsWhere<Role>[],
-  ): Promise<number> {
-    return this.roleRepo.count({ where: filters });
+  async count(filters?: FindOptionsWhere<Role> | FindOptionsWhere<Role>[]): Promise<number> {
+    return this.repo.count({ where: filters });
   }
 }

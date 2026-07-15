@@ -1,33 +1,45 @@
-// create.dto.ts (sin cambios, todo required)
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, ValidateNested } from 'class-validator';
+import {
+  IsBoolean,
+  IsDefined,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
+import { PartialType, OmitType } from '@nestjs/mapped-types';
 import IdDto from 'src/common/dto/id.dto';
 
 export class CreateUserDto {
-  @ApiProperty({ example: 'usuario123' })
-  @IsString() @IsNotEmpty() username: string = '';
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(20)
+  @Matches(/^[a-zA-Z0-9_]+$/, { message: 'username solo puede contener letras, números y guion bajo' })
+  username: string = '';
 
-  @ApiProperty({ example: 'Juan' })
   @IsString() @IsNotEmpty() name: string = '';
 
-  @ApiProperty({ example: 'Pérez' })
   @IsString() @IsNotEmpty() surname: string = '';
 
-  @ApiProperty({ example: 'usuario@example.com' })
   @IsEmail() @IsNotEmpty() email: string = '';
 
-  @ApiProperty({ minLength: 6, example: 'secret123' })
-  @IsString() @MinLength(6) @IsNotEmpty() password: string = '';
+  @IsString() @IsNotEmpty() @MinLength(6) password: string = '';
 
-  @ApiPropertyOptional({ example: false })
-  @IsBoolean() @IsOptional() blocked?: boolean;
+  @IsBoolean() @IsNotEmpty() blocked: boolean = false;
 
-  @ApiProperty({ type: () => IdDto })
-  @ValidateNested() @Type(() => IdDto) @IsNotEmpty() role?: IdDto;
+  @ValidateNested() @Type(() => IdDto) @IsDefined() role: IdDto = new IdDto();
 
-  @ApiProperty({ type: () => IdDto })
-  @ValidateNested() @Type(() => IdDto) @IsNotEmpty() profile?: IdDto;
+  @ValidateNested() @Type(() => IdDto) @IsOptional() photo?: IdDto;
 }
 
-export class UpdateUserDto extends PartialType(CreateUserDto) { }
+export class UpdateUserDto extends PartialType(OmitType(CreateUserDto, ['password'] as const)) { }
+
+export class ChangePasswordDto {
+  @IsString() @IsNotEmpty() currentPassword: string = '';
+  @IsString() @IsNotEmpty() @MinLength(6) newPassword: string = '';
+}

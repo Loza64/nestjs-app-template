@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { CloudinaryModule } from './integrations/cloudinary/cloudinary.module';
@@ -64,8 +62,8 @@ import { CryptoModule } from './integrations/crypto/crypto.module';
     UploadInterceptorModule,
     CryptoModule,
   ],
-  controllers: [AppController],
-  providers: [AppService,
+  controllers: [],
+  providers: [
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

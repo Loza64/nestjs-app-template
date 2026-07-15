@@ -23,13 +23,7 @@ export class PermissionService {
     await this.permissionRepo.upsert(data, ['path', 'method']);
   }
 
-  async update({
-    id,
-    data,
-  }: {
-    id: number;
-    data: DeepPartial<Permission>;
-  }): Promise<Permission> {
+  async update({ id, data, }: { id: number; data: DeepPartial<Permission> }): Promise<Permission> {
     const permission = await this.findOneBy({ filters: { id } });
     Object.assign(permission, data);
     return this.permissionRepo.save(permission);
@@ -64,9 +58,7 @@ export class PermissionService {
     return new PaginationParser<Permission>(result)
   }
 
-  async count(
-    filters?: FindOptionsWhere<Permission> | FindOptionsWhere<Permission>[],
-  ): Promise<number> {
+  async count(filters?: FindOptionsWhere<Permission> | FindOptionsWhere<Permission>[]): Promise<number> {
     return this.permissionRepo.count({ where: filters });
   }
 }

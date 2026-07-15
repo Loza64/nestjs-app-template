@@ -7,5 +7,5 @@ export default class IdDto {
   @IsNotEmpty()
   @IsInt()
   @Type(() => Number)
-  id?: number;
+  id!: number;
 }

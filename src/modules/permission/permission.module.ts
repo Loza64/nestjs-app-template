@@ -10,6 +10,7 @@ import { PermissionController } from './controllers/permission/permission.contro
 @Module({
   imports: [TypeOrmModule.forFeature([Permission]), DiscoveryModule, SecurityRulesModule],
   providers: [PermissionService, PermissionsSeeder],
-  controllers: [PermissionController]
+  controllers: [PermissionController],
+  exports: [PermissionService]
 })
 export class PermissionModule { }
