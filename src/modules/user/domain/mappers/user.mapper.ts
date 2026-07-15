@@ -15,6 +15,7 @@ export class UserResponseDto {
   photo!: UploadResponseDto | null;
   createdAt!: Date;
   updatedAt!: Date;
+  deletedAt!: Date | null;
 }
 
 export class UserMapper {
@@ -30,6 +31,7 @@ export class UserMapper {
       photo: entity.photo ? UploadMapper.toResponse(entity.photo) : null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt
     };
   }
 

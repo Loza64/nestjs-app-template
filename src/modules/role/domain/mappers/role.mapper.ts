@@ -13,6 +13,7 @@ export class RoleResponseDto {
   permissions!: PermissionResponseDto[];
   createdAt!: Date;
   updatedAt!: Date;
+  deletedAt!: Date | null;
 }
 
 export class RoleMapper {
@@ -21,11 +22,10 @@ export class RoleMapper {
       id: entity.id,
       name: entity.name,
       description: entity.description,
-      permissions: entity.permissions
-        ? PermissionMapper.toResponseList(entity.permissions)
-        : [],
+      permissions: entity.permissions ? PermissionMapper.toResponseList(entity.permissions) : [],
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt
     };
   }
 
@@ -33,9 +33,7 @@ export class RoleMapper {
     return entities.map((e) => this.toResponse(e));
   }
 
-  static toPaginatedResponse(
-    pagination: PaginationParser<Role>,
-  ): PaginatedResponseDto<RoleResponseDto> {
+  static toPaginatedResponse(pagination: PaginationParser<Role>): PaginatedResponseDto<RoleResponseDto> {
     return new PaginatedResponseDto(
       this.toResponseList(pagination.data),
       pagination.pagination,
