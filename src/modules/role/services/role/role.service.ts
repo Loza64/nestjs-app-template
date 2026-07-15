@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ICrudService } from 'src/common/service/crud.service';
 import { Role } from '../../domain/entities/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, FindOptionsRelations, FindOptionsWhere, In, Repository } from 'typeorm';
+import { DeepPartial, FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, In, Repository } from 'typeorm';
 import { Permission } from 'src/modules/permission/domain/entities/permission.entity';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
@@ -64,6 +64,17 @@ export class RoleService implements ICrudService<Role> {
     return role;
   }
 
+  async softDelete(id: number): Promise<Role> {
+    await this.roleRepo.softDelete(id);
+    return await this.roleRepo.findOneOrFail({ where: { id }, withDeleted: true });
+  }
+
+  async softRestore(id: number): Promise<Role> {
+    const result = await this.roleRepo.restore(id);
+    if (!result.affected) throw new NotFoundException(`Role ${id} no existe`);
+    return await this.roleRepo.findOneByOrFail({ id });
+  }
+
   async findOneBy(params: {
     filters: FindOptionsWhere<Role> | FindOptionsWhere<Role>[];
     relations?: FindOptionsRelations<Role>;
@@ -77,15 +88,17 @@ export class RoleService implements ICrudService<Role> {
   }
 
   async findBy(params: {
+    order?: FindOptionsOrder<Role>;
     filters: FindOptionsWhere<Role> | FindOptionsWhere<Role>[];
     relations?: FindOptionsRelations<Role>;
     page: number;
     size: number;
+    withDeleted?: boolean;
   }): Promise<PaginationParser<Role>> {
     const result = await paginate<Role>(
       this.roleRepo,
       { page: params.page, limit: params.size },
-      { where: params.filters, relations: params.relations },
+      { where: params.filters, relations: params.relations, order: params.order, withDeleted: params.withDeleted },
     );
     return new PaginationParser(result)
   }

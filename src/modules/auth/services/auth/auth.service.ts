@@ -32,7 +32,7 @@ export class AuthService {
 
     const hashedPassword = await this.cryptoService.encrypt(data.password);
 
-    const role = await this.roleRepo.findOne({ where: { id: 2 } }); //role user por defecto
+    const role = await this.roleRepo.findOne({ where: { id: 1 } });
 
     const user = this.userRepo.create({
       ...data,
@@ -58,7 +58,7 @@ export class AuthService {
       throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
 
-    if (user.isDeleted) {
+    if (user.deletedAt !== null) {
       throw new UnauthorizedException('Account is deactivated');
     }
 

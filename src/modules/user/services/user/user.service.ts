@@ -1,67 +1,57 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ICrudService } from 'src/common/service/crud.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from 'src/modules/role/domain/entities/role.entity';
-import { DeepPartial, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import { DeepPartial, FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
+import { CryptoService } from 'src/integrations/crypto/crypto.service';
 import { User } from '../../domain/entity/user.entity';
+import { UploadService } from 'src/modules/upload/services/upload/upload.service';
 
 @Injectable()
 export class UserService implements ICrudService<User> {
   constructor(
-    @InjectRepository(User) private readonly userRepo: Repository<User>,
-    @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
+    @InjectRepository(User) private readonly repo: Repository<User>,
+    private readonly upload: UploadService,
+    private readonly cryptoService: CryptoService,
   ) { }
 
   async create(data: DeepPartial<User>): Promise<User> {
-    let role: Role | null = null;
-
-    if (data.role?.id) {
-      role = await this.roleRepo.findOne({ where: { id: data.role.id } });
-      if (!role) throw new NotFoundException('Role not found');
-    }
-
-    const user = this.userRepo.create({ ...data, role });
-    return this.userRepo.save(user);
+    const user = this.repo.create(data);
+    if (user.password) user.password = await this.cryptoService.encrypt(user.password);
+    return this.repo.save(user);
   }
 
-  async update({
-    id,
-    data,
-  }: {
-    id: number;
-    data: DeepPartial<User>;
-  }): Promise<User> {
-    const user = await this.findOneBy({ filters: { id } });
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) user[key] = value;
-    });
-
-    if (data.role?.id) {
-      const roleEntity = await this.roleRepo.findOne({
-        where: { id: data.role.id },
-      });
-      if (!roleEntity) throw new NotFoundException('Role not found');
-      user.role = roleEntity;
-    }
-
-    return this.userRepo.save(user);
+  async update({ id, data }: { id: number; data: DeepPartial<User> }): Promise<User> {
+    const user = await this.findOneBy({ filters: { id }, relations: { photo: true } });
+    Object.entries(data).forEach(([key, value]) => { if (value !== undefined && key !== 'id') user[key] = value });
+    if (data.password) user.password = await this.cryptoService.encrypt(data.password);
+    if (data.photo?.id && user.photo?.id && data.photo.id !== user.photo.id) await this.upload.deleteFile(user.photo.id)
+    return this.repo.save(user);
   }
 
   async delete(id: number): Promise<User> {
     const user = await this.findOneBy({ filters: { id } });
-    if (!user) throw new NotFoundException('User not found');
-    await this.userRepo.remove(user);
+    await this.repo.remove(user);
     return user;
+  }
+
+  async softDelete(id: number): Promise<User> {
+    await this.repo.softDelete(id);
+    return await this.repo.findOneOrFail({ where: { id }, withDeleted: true });
+  }
+
+  async softRestore(id: number): Promise<User> {
+    const result = await this.repo.restore(id);
+    if (!result.affected) throw new NotFoundException(`User ${id} no existe`);
+    return await this.repo.findOneByOrFail({ id });
   }
 
   async findOneBy(params: {
     filters: FindOptionsWhere<User> | FindOptionsWhere<User>[];
     relations?: FindOptionsRelations<User>;
   }): Promise<User> {
-    const user = await this.userRepo.findOne({
+    const user = await this.repo.findOne({
       where: params.filters,
       relations: params.relations,
     });
@@ -70,15 +60,17 @@ export class UserService implements ICrudService<User> {
   }
 
   async findBy(params: {
+    order?: FindOptionsOrder<User>;
     filters: FindOptionsWhere<User> | FindOptionsWhere<User>[];
     relations?: FindOptionsRelations<User>;
     page: number;
     size: number;
+    withDeleted?: boolean;
   }): Promise<PaginationParser<User>> {
     const result = await paginate<User>(
-      this.userRepo,
+      this.repo,
       { page: params.page, limit: params.size },
-      { where: params.filters, relations: params.relations },
+      { where: params.filters, relations: params.relations, order: params.order, withDeleted: params.withDeleted },
     );
     return new PaginationParser(result)
   }
@@ -86,6 +78,6 @@ export class UserService implements ICrudService<User> {
   async count(
     filters?: FindOptionsWhere<User> | FindOptionsWhere<User>[],
   ): Promise<number> {
-    return this.userRepo.count({ where: filters });
+    return this.repo.count({ where: filters });
   }
 }

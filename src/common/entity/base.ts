@@ -2,7 +2,6 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  Column,
   DeleteDateColumn,
 } from 'typeorm';
 
@@ -16,9 +15,6 @@ export abstract class BaseEntity {
   @UpdateDateColumn({ type: 'timestamptz', select: false })
   updatedAt: Date = new Date();
 
-  @DeleteDateColumn({ type: 'timestamptz', nullable: true, select: false })
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true, default: null })
   deletedAt: Date | null = null;
-
-  @Column({ type: 'boolean', default: false })
-  isDeleted: boolean = false;
 }

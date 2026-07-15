@@ -4,61 +4,58 @@ import {
   Post,
   Put,
   Delete,
+  Patch,
   Param,
   Body,
   Query,
   ParseIntPipe,
   ForbiddenException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from '../../services/user/user.service';
 import { User } from '../../domain/entity/user.entity';
-import { FindUsersQueryDto } from '../../domain/dto/findUsersQueryDto.dto';
-import { FindOptionsWhere, ILike, IsNull, Not } from 'typeorm';
-import { CreateUserDto } from '../../domain/dto/create.dto';
-import { UpdateUserDto } from '../../domain/dto/update.dto';
+import { querys } from '../../domain/dto/querys';
+import { FindOptionsWhere, IsNull, Not } from 'typeorm';
+import { CreateUserDto, UpdateUserDto } from '../../domain/dto/payload.dto';
 import { Profile } from 'src/common/decorators/profile';
+import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
 
-@Controller('api/users')
+@Controller('users')
 export class UserController {
   constructor(private readonly usersService: UserService) { }
 
   private preventSelfAction(id: number, profile: User) {
-    if (id === profile.id)
-      throw new ForbiddenException(
-        'Cannot perform this action on your profile',
-      );
+    if (id === profile.id) throw new ForbiddenException('Cannot perform this action on your profile');
   }
 
   @Get()
-  async findAll(@Query() query: FindUsersQueryDto) {
-    const { page = 1, size = 20, search, blocked, role, deleted } = query;
+  @HttpCode(HttpStatus.OK)
+  async findAll(@Query() query: querys) {
+    const { page = 1, size = 20, search, blocked, role, isDeleted, sort } = query;
 
-    let filters: FindOptionsWhere<User> | FindOptionsWhere<User>[];
-
-    const baseFilter = {
+    const baseFilter: FindOptionsWhere<User> = {
       ...(blocked !== undefined ? { blocked } : {}),
       ...(role ? { role: { id: role } } : {}),
-      ...(deleted !== undefined ? { deletedAt: deleted ? Not(IsNull()) : IsNull() } : {}),
     };
 
-    if (search) {
-      filters = ['name', 'email', 'username'].map((field) => ({
-        [field]: ILike(`%${search}%`),
-        ...baseFilter,
-      }));
-    } else {
-      filters = baseFilter;
-    }
+    baseFilter.deletedAt = isDeleted ? Not(IsNull()) : IsNull();
+
+    const filters = parseSearch<User>(search, ['name', 'email', 'username', 'surname'], baseFilter);
+    const order = parseSort<User>(sort, ['id', 'name', 'email', 'createdAt', 'username']);
 
     return this.usersService.findBy({
+      withDeleted: isDeleted,
       filters,
       relations: { role: true },
       page,
       size,
+      order,
     });
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.usersService.findOneBy({
       filters: { id },
@@ -74,6 +71,7 @@ export class UserController {
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateUserDto,
@@ -90,5 +88,21 @@ export class UserController {
   ): Promise<User> {
     this.preventSelfAction(id, profile);
     return this.usersService.delete(id);
+  }
+
+  @Patch(':id/soft-delete')
+  @HttpCode(HttpStatus.OK)
+  async softDelete(
+    @Param('id', ParseIntPipe) id: number,
+    @Profile() profile: User,
+  ): Promise<User> {
+    this.preventSelfAction(id, profile);
+    return this.usersService.softDelete(id);
+  }
+
+  @Patch(':id/restore')
+  @HttpCode(HttpStatus.OK)
+  async restore(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return this.usersService.softRestore(id);
   }
 }

@@ -40,7 +40,7 @@ export class JwtAuthGuard implements CanActivate {
 
     if (!user)
       throw new UnauthorizedException('The account associated with this token no longer exists.');
-    if (user.isDeleted)
+    if (user.deletedAt !== null)
       throw new UnauthorizedException('This account is currently deactivated.');
     if (user.blocked)
       throw new UnauthorizedException(

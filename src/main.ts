@@ -5,6 +5,7 @@ import CorsOrigin from './common/models/cors.config';
 import { ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './filter/http.exception.filter';
 import { TypeOrmExceptionFilter } from './filter/typeorm.exception.filter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -42,6 +43,20 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  app.setGlobalPrefix('api');
+
+  if (configService.get<string>('NODE_ENV') === 'develop') {
+    const config = new DocumentBuilder()
+      .setTitle('nest-app-template')
+      .setDescription('Documentación de la API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   const port = configService.get<number>('PORT') || 3000;
   await app.listen(port);

@@ -4,39 +4,50 @@ import {
   Post,
   Put,
   Delete,
+  Patch,
   Param,
   Body,
   Query,
   ParseIntPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { RoleService } from '../../services/role/role.service';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { Role } from '../../domain/entities/role.entity';
 import { CreateRoleDto } from '../../domain/dto/role-create.dto';
 import { UpdateRoleDto } from '../../domain/dto/role-update.dto';
+import BaseQuerys from 'src/common/dto/base-querys.dto';
+import { FindOptionsWhere, IsNull, Not } from 'typeorm';
+import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
 
-@Controller('api/roles')
+@Controller('roles')
 export class RoleController {
   constructor(private readonly rolesService: RoleService) { }
 
   @Get()
-  async findBy(
-    @Query() query: Record<string, string>,
-  ): Promise<PaginationParser<Role>> {
-    const { page = '1', size = '50' } = query;
+  @HttpCode(HttpStatus.OK)
+  async findAll(@Query() query: BaseQuerys): Promise<PaginationParser<Role>> {
+    const { page, size, isDeleted, search, sort } = query;
 
-    const pageNumber = parseInt(page, 10);
-    const pageSize = parseInt(size, 10);
+    const baseFilter: FindOptionsWhere<Role> = {};
+    baseFilter.deletedAt = isDeleted ? Not(IsNull()) : IsNull();
+
+    const filters = parseSearch<Role>(search, ['name'], baseFilter);
+    const order = parseSort<Role>(sort, ['id', 'name', 'createdAt', 'updatedAt']);
 
     return this.rolesService.findBy({
-      filters: {},
-      relations: {},
-      page: pageNumber,
-      size: pageSize,
+      withDeleted: isDeleted,
+      filters,
+      order,
+      relations: { permissions: true },
+      page: Number(page),
+      size: Number(size),
     });
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Role> {
     return this.rolesService.findOneBy({ filters: { id }, relations: { permissions: true } });
   }
@@ -47,6 +58,7 @@ export class RoleController {
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   async update(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateRoleDto): Promise<Role> {
     return this.rolesService.update({ id, data });
   }
@@ -55,5 +67,16 @@ export class RoleController {
   async delete(@Param('id', ParseIntPipe) id: number): Promise<Role> {
     return this.rolesService.delete(id);
   }
-}
 
+  @Patch(':id/soft-delete')
+  @HttpCode(HttpStatus.OK)
+  async softDelete(@Param('id', ParseIntPipe) id: number): Promise<Role> {
+    return this.rolesService.softDelete(id);
+  }
+
+  @Patch(':id/restore')
+  @HttpCode(HttpStatus.OK)
+  async restore(@Param('id', ParseIntPipe) id: number): Promise<Role> {
+    return this.rolesService.softRestore(id);
+  }
+}

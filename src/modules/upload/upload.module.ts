@@ -9,6 +9,7 @@ import { UploadInterceptorModule } from 'src/common/interceptors/upload/upload.i
 @Module({
   imports: [CloudinaryModule, UploadInterceptorModule, TypeOrmModule.forFeature([Upload])],
   providers: [UploadService],
-  controllers: [UploadController]
+  controllers: [UploadController],
+  exports: [UploadService]
 })
 export class UploadModule { }

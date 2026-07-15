@@ -7,7 +7,7 @@ import { SignUpDto } from '../../domain/dto/signup.dto';
 import { User } from 'src/modules/user/domain/entity/user.entity';
 import { Profile } from 'src/common/decorators/profile';
 
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Permission } from '../../domain/entities/permission.entity';
-import { DeepPartial, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import { DeepPartial, FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
 
@@ -48,15 +48,17 @@ export class PermissionService {
   }
 
   async findBy(params: {
+    order?: FindOptionsOrder<Permission>;
     filters: FindOptionsWhere<Permission> | FindOptionsWhere<Permission>[];
     relations?: FindOptionsRelations<Permission>;
     page: number;
     size: number;
+    withDeleted?: boolean;
   }): Promise<PaginationParser<Permission>> {
     const result = await paginate<Permission>(
       this.permissionRepo,
       { page: params.page, limit: params.size },
-      { where: params.filters, relations: params.relations },
+      { where: params.filters, relations: params.relations, order: params.order, withDeleted: params.withDeleted },
     );
 
     return new PaginationParser<Permission>(result)
