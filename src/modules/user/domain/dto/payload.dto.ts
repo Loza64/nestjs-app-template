@@ -38,8 +38,3 @@ export class CreateUserDto {
 }
 
 export class UpdateUserDto extends PartialType(OmitType(CreateUserDto, ['password'] as const)) { }
-
-export class ChangePasswordDto {
-  @IsString() @IsNotEmpty() currentPassword: string = '';
-  @IsString() @IsNotEmpty() @MinLength(6) newPassword: string = '';
-}

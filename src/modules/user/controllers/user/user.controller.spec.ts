@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from '../../services/user/user.service';
+import { UploadService } from 'src/modules/upload/services/upload/upload.service';
+import { CleanupOrphanPhotoInterceptor } from '../../interceptors/cleanup-orphan-photo/cleanup-orphan-photo.interceptor';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 describe('UserController', () => {
@@ -21,6 +23,18 @@ describe('UserController', () => {
             softDelete: jest.fn(),
             softRestore: jest.fn(),
           },
+        },
+        {
+          provide: UploadService,
+          useValue: {
+            findById: jest.fn(),
+            deleteFile: jest.fn(),
+          },
+        },
+        {
+          provide: CleanupOrphanPhotoInterceptor,
+          useFactory: (uploadService: UploadService) => new CleanupOrphanPhotoInterceptor(uploadService),
+          inject: [UploadService],
         },
       ],
     }).compile();

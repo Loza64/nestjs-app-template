@@ -3,7 +3,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { User } from 'src/modules/user/domain/entity/user.entity';
-import { Role } from 'src/modules/role/domain/entities/role.entity';
 import { CryptoService } from 'src/integrations/crypto/crypto.service';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
@@ -23,12 +22,6 @@ describe('AuthService', () => {
             findOneOrFail: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
-          },
-        },
-        {
-          provide: getRepositoryToken(Role),
-          useValue: {
-            findOne: jest.fn(),
           },
         },
         {

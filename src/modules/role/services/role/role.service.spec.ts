@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RoleService } from './role.service';
 import { Role } from '../../domain/entities/role.entity';
-import { Permission } from 'src/modules/permission/domain/entities/permission.entity';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { PermissionService } from 'src/modules/permission/services/permission/permission.service';
 
 describe('RoleService', () => {
   let service: RoleService;
@@ -25,10 +25,11 @@ describe('RoleService', () => {
             softDelete: jest.fn(),
             restore: jest.fn(),
             count: jest.fn(),
+            resolvePermissions: jest.fn()
           },
         },
         {
-          provide: getRepositoryToken(Permission),
+          provide: PermissionService,
           useValue: {
             findBy: jest.fn(),
           },

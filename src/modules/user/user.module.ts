@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './domain/entity/user.entity';
 import { CryptoModule } from 'src/integrations/crypto/crypto.module';
 import { UploadModule } from '../upload/upload.module';
+import { CleanupOrphanPhotoInterceptor } from './interceptors/cleanup-orphan-photo/cleanup-orphan-photo.interceptor';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), CryptoModule, UploadModule],
-  providers: [UserService],
+  providers: [UserService, CleanupOrphanPhotoInterceptor],
   controllers: [UserController]
 })
 export class UserModule { }

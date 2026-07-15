@@ -87,16 +87,17 @@ export class UploadService {
   }
 
   async findById(id: number): Promise<Upload> {
-    const upload = await this.uploadRepo.findOne({ where: { id } });
+    const upload = await this.uploadRepo.findOne({ where: { id }, relations: { user: true } });
     if (!upload) throw new NotFoundException(`File with id ${id} not found`);
     return upload;
   }
 
   async findBy(params: { page: number; size: number }): Promise<PaginationParser<Upload>> {
-    const result = await paginate<Upload>(this.uploadRepo, {
-      page: params.page,
-      limit: params.size,
-    });
+    const result = await paginate<Upload>(
+      this.uploadRepo,
+      { page: params.page, limit: params.size },
+      { relations: { user: true } },
+    );
     return new PaginationParser<Upload>(result);
   }
 }

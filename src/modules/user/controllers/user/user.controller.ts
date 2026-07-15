@@ -12,6 +12,7 @@ import {
   ForbiddenException,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '../../services/user/user.service';
 import { User } from '../../domain/entity/user.entity';
@@ -20,6 +21,7 @@ import { FindOptionsWhere, IsNull, Not } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../../domain/dto/payload.dto';
 import { Profile } from 'src/common/decorators/profile';
 import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
+import { CleanupOrphanPhotoInterceptor } from '../../interceptors/cleanup-orphan-photo/cleanup-orphan-photo.interceptor';
 
 @Controller('users')
 export class UserController {
@@ -65,11 +67,13 @@ export class UserController {
     });
   }
 
+  @UseInterceptors(CleanupOrphanPhotoInterceptor)
   @Post()
   async create(@Body() dto: CreateUserDto): Promise<User> {
     return this.usersService.create(dto);
   }
 
+  @UseInterceptors(CleanupOrphanPhotoInterceptor)
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   async update(
