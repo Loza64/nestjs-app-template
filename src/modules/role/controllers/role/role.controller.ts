@@ -18,7 +18,8 @@ import BaseQuerys from 'src/common/dto/base-querys.dto';
 import { FindOptionsWhere, IsNull, Not } from 'typeorm';
 import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
 import { Role } from '../../domain/entities/role.entity';
-import { RoleMapper, RoleResponseDto } from '../../domain/mappers/role.mapper';
+import { RoleMapper } from '../../domain/mappers/role.mapper';
+import { RoleResponseDto } from '../../domain/dto/response.dto';
 
 @Controller('roles')
 export class RoleController {

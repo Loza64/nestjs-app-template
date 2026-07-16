@@ -9,11 +9,12 @@ import {
   SignUpDto,
   UpdateProfileDto,
 } from '../../domain/dto/payload.dto';
-import { UserMapper, UserResponseDto } from 'src/modules/user/domain/mappers/user.mapper';
+import { UserMapper } from 'src/modules/user/domain/mappers/user.mapper';
+import { UserResponseDto } from 'src/modules/user/domain/dto/response.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('login')
   async login(@Body() data: LoginDto): Promise<AuthResponseDto> {

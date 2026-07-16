@@ -1,20 +1,10 @@
 import { Role } from '../entities/role.entity';
 import {
   PermissionMapper,
-  PermissionResponseDto,
 } from 'src/modules/permission/domain/mappers/permission.mapper';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-
-export class RoleResponseDto {
-  id!: number;
-  name?: string;
-  description?: string;
-  permissions!: PermissionResponseDto[];
-  createdAt!: Date;
-  updatedAt!: Date;
-  deletedAt!: Date | null;
-}
+import { RoleResponseDto } from '../dto/response.dto';
 
 export class RoleMapper {
   static toResponse(entity: Role): RoleResponseDto {

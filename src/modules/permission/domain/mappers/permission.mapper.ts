@@ -1,13 +1,7 @@
 import { Permission } from '../entities/permission.entity';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-
-export class PermissionResponseDto {
-  id!: number;
-  path!: string;
-  method!: string;
-  title!: string | null;
-}
+import { PermissionResponseDto } from '../dto/response.dto';
 
 export class PermissionMapper {
   static toResponse(entity: Permission): PermissionResponseDto {

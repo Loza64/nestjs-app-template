@@ -1,4 +1,4 @@
-import { UserResponseDto } from 'src/modules/user/domain/mappers/user.mapper';
+import { UserResponseDto } from "src/modules/user/domain/dto/response.dto";
 
 export class AuthResponseDto {
   token?: string;

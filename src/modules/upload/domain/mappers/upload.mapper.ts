@@ -1,20 +1,7 @@
 import { Upload } from '../entity/upload.entity';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-
-export class UploadResponseDto {
-  id!: number;
-  url!: string;
-  secureUrl!: string;
-  resourceType!: string;
-  format!: string;
-  originalFilename!: string;
-  width!: number | null;
-  height!: number | null;
-  bytes!: number | null;
-  tags!: string[] | null;
-  eager!: { url: string; secureUrl: string; width: number; height: number }[] | null;
-}
+import { UploadResponseDto } from '../dto/response.dto';
 
 export class UploadMapper {
   static toResponse(entity: Upload): UploadResponseDto {

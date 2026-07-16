@@ -22,7 +22,8 @@ import { CreateUserDto, UpdateUserDto } from '../../domain/dto/payload.dto';
 import { Profile } from 'src/common/decorators/profile';
 import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
 import { CleanupOrphanPhotoInterceptor } from '../../interceptors/cleanup-orphan-photo/cleanup-orphan-photo.interceptor';
-import { UserMapper, UserResponseDto } from '../../domain/mappers/user.mapper';
+import { UserMapper } from '../../domain/mappers/user.mapper';
+import { UserResponseDto } from '../../domain/dto/response.dto';
 
 @Controller('users')
 export class UserController {

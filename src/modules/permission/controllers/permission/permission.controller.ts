@@ -1,7 +1,8 @@
 import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PermissionService } from '../../services/permission/permission.service';
 import { PermissionUpdateDto } from '../../domain/dto/permision.update.dto';
-import { PermissionMapper, PermissionResponseDto } from '../../domain/mappers/permission.mapper';
+import { PermissionMapper } from '../../domain/mappers/permission.mapper';
+import { PermissionResponseDto } from '../../domain/dto/response.dto';
 
 @Controller('/permissions')
 export class PermissionController {

@@ -1,22 +1,9 @@
 import { User } from '../entity/user.entity';
-import { RoleMapper, RoleResponseDto } from 'src/modules/role/domain/mappers/role.mapper';
-import { UploadMapper, UploadResponseDto } from 'src/modules/upload/domain/mappers/upload.mapper';
+import { RoleMapper } from 'src/modules/role/domain/mappers/role.mapper';
+import { UploadMapper } from 'src/modules/upload/domain/mappers/upload.mapper';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
-
-export class UserResponseDto {
-  id!: number;
-  username!: string;
-  name!: string;
-  surname!: string;
-  email!: string;
-  blocked!: boolean;
-  role!: RoleResponseDto | null;
-  photo!: UploadResponseDto | null;
-  createdAt!: Date;
-  updatedAt!: Date;
-  deletedAt!: Date | null;
-}
+import { UserResponseDto } from '../dto/response.dto';
 
 export class UserMapper {
   static toResponse(entity: User): UserResponseDto {
