@@ -8,7 +8,7 @@ import { PATH_METADATA, METHOD_METADATA } from '@nestjs/common/constants';
 import { DeepPartial } from 'typeorm';
 import { PermissionService } from '../services/permission/permission.service';
 import { SecurityRules } from 'src/security/rules/security.rules';
-import { Permission } from '../domain/entities/permission.entity';
+import { Permission } from '../domain/entity/permission.entity';
 
 @Injectable()
 export class PermissionsSeeder implements OnApplicationBootstrap {

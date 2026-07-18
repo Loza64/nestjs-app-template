@@ -3,6 +3,6 @@ import { PermissionResponseDto } from "src/modules/permission/domain/dto/respons
 
 export class RoleResponseDto extends BaseResponse {
   name?: string;
-  description?: string;
-  permissions!: PermissionResponseDto[];
+  active?: boolean;
+  permissions?: PermissionResponseDto[];
 }

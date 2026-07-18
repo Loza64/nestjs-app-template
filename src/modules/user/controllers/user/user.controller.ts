@@ -36,20 +36,23 @@ export class UserController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(@Query() query: querys) {
-    const { page = 1, size = 20, search, blocked, role, isDeleted, sort } = query;
+    const { page = 1, size = 20, search, blocked, role, deleted, sort } = query;
 
     const baseFilter: FindOptionsWhere<User> = {
       ...(blocked !== undefined ? { blocked } : {}),
       ...(role ? { role: { id: role } } : {}),
     };
 
-    baseFilter.deletedAt = isDeleted ? Not(IsNull()) : IsNull();
+    baseFilter.deletedAt = deleted ? Not(IsNull()) : IsNull();
 
     const filters = parseSearch<User>(search, ['name', 'email', 'username', 'surname'], baseFilter);
-    const order = parseSort<User>(sort, ['id', 'name', 'email', 'createdAt', 'username']);
+    const order = parseSort<User>({
+      sort,
+      forbiddenFields: ['password']
+    });
 
     const result = await this.usersService.findBy({
-      withDeleted: isDeleted,
+      withDeleted: deleted,
       filters,
       relations: { role: true, photo: true },
       page,

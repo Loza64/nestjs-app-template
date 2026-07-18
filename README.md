@@ -48,7 +48,7 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
 
 ### Common
 
-- `src/common/entity/base.ts` — clase base para entidades con campos comunes (`id`, `createdAt`, `updatedAt`, `deletedAt`, `isDeleted`)
+- `src/common/entity/base.ts` — clase base para entidades con campos comunes (`id`, `createdAt`, `updatedAt`, `deletedAt`, `deleted`)
 - `src/common/decorators/profile.ts` — decorador personalizado `@Profile()` para inyectar el usuario autenticado en un controlador
 - `src/common/interceptors/upload/upload.interceptor.ts` — interceptor de NestJS para validar tipos de archivo al subir
 - `src/common/parser/pagination.parser.ts` — parser para respuesta paginada usando `nestjs-typeorm-paginate`
@@ -156,12 +156,12 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
 
 #### Entidades principales
 
-- `Role` (`src/modules/role/domain/entities/role.entity.ts`):
+- `Role` (`src/modules/role/domain/entity/role.entity.ts`):
   - `name`
   - `description`
   - relación ManyToMany con `Permission`
 
-- `Permission` (`src/modules/permission/domain/entities/permission.entity.ts`):
+- `Permission` (`src/modules/permission/domain/entity/permission.entity.ts`):
   - `path`
   - `method`
   - `title`
@@ -323,7 +323,7 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
 El proyecto incluye un patrón de servicio común basado en la interfaz `ICrudService<T>` que define los métodos CRUD estándar y paginación.
 
 - `src/common/service/crud.service.ts` define `ICrudService<T>`.
-- `src/common/entity/base.ts` define `BaseEntity` con campos comunes como `id`, `createdAt`, `updatedAt`, `deletedAt` y `isDeleted`.
+- `src/common/entity/base.ts` define `BaseEntity` con campos comunes como `id`, `createdAt`, `updatedAt`, `deletedAt` y `deleted`.
 - `src/common/parser/pagination.parser.ts` convierte la salida de `nestjs-typeorm-paginate` en una respuesta uniforme.
 
 ### Ejemplo de entidad base

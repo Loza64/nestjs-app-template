@@ -1,4 +1,6 @@
+import { BadRequestException } from '@nestjs/common';
 import { FindOperator, FindOptionsOrder, FindOptionsWhere, ILike } from 'typeorm';
+import { BaseEntity } from '../entity/base';
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return (
@@ -37,26 +39,30 @@ export function parseSearch<TEntity>(
 
   const matcher = ILike(`%${search.trim()}%`);
 
-  return fields.map(
-    (field) =>
-      deepMerge(baseFilter as Record<string, unknown>, buildNested(field, matcher)) as FindOptionsWhere<TEntity>,
-  );
+  return fields.map((field) => deepMerge(baseFilter, buildNested(field, matcher)) as FindOptionsWhere<TEntity>);
 }
 
-const DEFAULT_SORT = { id: 'ASC' } as FindOptionsOrder<unknown>;
+const VALID_ORDERS = ['asc', 'desc'];
 
-export function parseSort<T>(sortParam: string | undefined, allowedFields?: (keyof T)[]): FindOptionsOrder<T> {
-  if (!sortParam) return DEFAULT_SORT;
+interface ParseSortOptions<T extends BaseEntity> {
+  sort?: string[];
+  forbiddenFields?: (keyof T)[];
+  defaultSort?: FindOptionsOrder<T>;
+}
 
-  const order = sortParam.split(',').reduce((acc, part) => {
+export function parseSort<T extends BaseEntity>({ sort, forbiddenFields, defaultSort = {} }: ParseSortOptions<T>): FindOptionsOrder<T> {
+  if (!sort || sort.length === 0) return defaultSort;
 
-    const [field, dir = 'ASC'] = part.trim().split(':');
-    const direction = dir.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+  const sortData: FindOptionsOrder<T> = {};
 
-    if (allowedFields && !allowedFields.includes(field as keyof T)) return acc
+  sort.forEach((item) => {
+    const [field, order] = item.split(',');
+    if (!field || !order || !VALID_ORDERS.includes(order.toLowerCase()))
+      throw new BadRequestException(`sort inválido: "${item}", formato esperado "campo,asc"`);
+    if (forbiddenFields?.includes(field as keyof T))
+      throw new BadRequestException(`no se puede ordenar por el campo "${field}"`);
+    sortData[field] = order.toUpperCase() as 'ASC' | 'DESC';
+  });
 
-    return { ...acc, [field]: direction };
-  }, {} as FindOptionsOrder<T>);
-
-  return Object.keys(order).length ? order : (DEFAULT_SORT);
+  return sortData;
 }

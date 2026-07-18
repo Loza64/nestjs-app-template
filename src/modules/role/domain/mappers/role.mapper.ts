@@ -1,4 +1,4 @@
-import { Role } from '../entities/role.entity';
+import { Role } from '../entity/role.entity';
 import {
   PermissionMapper,
 } from 'src/modules/permission/domain/mappers/permission.mapper';
@@ -11,8 +11,8 @@ export class RoleMapper {
     return {
       id: entity.id,
       name: entity.name,
-      description: entity.description,
-      permissions: entity.permissions ? PermissionMapper.toResponseList(entity.permissions) : [],
+      active: entity.active,
+      permissions: entity.permissions ? PermissionMapper.toResponseList(entity.permissions) : undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt
@@ -24,9 +24,6 @@ export class RoleMapper {
   }
 
   static toPaginatedResponse(pagination: PaginationParser<Role>): PaginatedResponseDto<RoleResponseDto> {
-    return new PaginatedResponseDto(
-      this.toResponseList(pagination.data),
-      pagination.pagination,
-    );
+    return new PaginatedResponseDto(this.toResponseList(pagination.data), pagination.pagination);
   }
 }

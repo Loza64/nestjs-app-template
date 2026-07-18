@@ -6,7 +6,7 @@ import {
   OneToOne,
 } from 'typeorm';
 import { BaseEntity } from 'src/common/entity/base';
-import { Role } from 'src/modules/role/domain/entities/role.entity';
+import { Role } from 'src/modules/role/domain/entity/role.entity';
 import { Upload } from 'src/modules/upload/domain/entity/upload.entity';
 
 @Entity('users')

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Permission } from '../../domain/entities/permission.entity';
+import { Permission } from '../../domain/entity/permission.entity';
 import { DeepPartial, FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';

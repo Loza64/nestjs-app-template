@@ -14,7 +14,7 @@ export class PermissionController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('size', new DefaultValuePipe(10), ParseIntPipe) size: number,
   ) {
-    const result = await this.service.findBy({ filters: {}, page, size });
+    const result = await this.service.findBy({ page, size, filters: {} });
     return PermissionMapper.toPaginatedResponse(result);
   }
 

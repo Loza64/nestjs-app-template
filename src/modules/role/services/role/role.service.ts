@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ICrudService } from 'src/common/service/crud.service';
-import { Role } from '../../domain/entities/role.entity';
+import { Role } from '../../domain/entity/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, In, Repository } from 'typeorm';
-import { Permission } from 'src/modules/permission/domain/entities/permission.entity';
+import { Permission } from 'src/modules/permission/domain/entity/permission.entity';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { CreateRoleDto, UpdateRoleDto } from '../../domain/dto/payload.dto';

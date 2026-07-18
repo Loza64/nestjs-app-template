@@ -1,6 +1,7 @@
 import {
   ArrayUnique,
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -16,6 +17,10 @@ export class CreateRoleDto {
   @IsNotEmpty()
   @MaxLength(50)
   name?: string;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  active?: boolean
 
   @IsOptional()
   @IsArray()

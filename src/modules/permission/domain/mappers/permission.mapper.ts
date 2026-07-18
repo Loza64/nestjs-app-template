@@ -1,4 +1,4 @@
-import { Permission } from '../entities/permission.entity';
+import { Permission } from '../entity/permission.entity';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { PaginatedResponseDto } from 'src/common/dto/paginated-response.dto';
 import { PermissionResponseDto } from '../dto/response.dto';

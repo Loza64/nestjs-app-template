@@ -16,10 +16,10 @@ import { RoleService } from '../../services/role/role.service';
 import { CreateRoleDto, UpdateRoleDto } from '../../domain/dto/payload.dto';
 import BaseQuerys from 'src/common/dto/base-querys.dto';
 import { FindOptionsWhere, IsNull, Not } from 'typeorm';
-import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
-import { Role } from '../../domain/entities/role.entity';
+import { Role } from '../../domain/entity/role.entity';
 import { RoleMapper } from '../../domain/mappers/role.mapper';
 import { RoleResponseDto } from '../../domain/dto/response.dto';
+import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
 
 @Controller('roles')
 export class RoleController {
@@ -28,21 +28,20 @@ export class RoleController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(@Query() query: BaseQuerys) {
-    const { page, size, isDeleted, search, sort } = query;
+    const { page, size, deleted, search, sort } = query;
 
     const baseFilter: FindOptionsWhere<Role> = {};
-    baseFilter.deletedAt = isDeleted ? Not(IsNull()) : IsNull();
+    baseFilter.deletedAt = deleted ? Not(IsNull()) : IsNull();
 
     const filters = parseSearch<Role>(search, ['name'], baseFilter);
-    const order = parseSort<Role>(sort, ['id', 'name', 'createdAt', 'updatedAt']);
+    const order = parseSort<Role>({ sort, forbiddenFields: ['permissions'] });
 
     const result = await this.rolesService.findBy({
-      withDeleted: isDeleted,
+      withDeleted: deleted,
       filters,
       order,
-      relations: { permissions: true },
-      page: Number(page),
-      size: Number(size),
+      page: page,
+      size: size,
     });
 
     return RoleMapper.toPaginatedResponse(result);
