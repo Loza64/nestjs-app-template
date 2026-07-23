@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  OnApplicationBootstrap,
-  RequestMethod,
-} from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap, RequestMethod } from '@nestjs/common';
 import { DiscoveryService, Reflector } from '@nestjs/core';
 import { PATH_METADATA, METHOD_METADATA } from '@nestjs/common/constants';
 import { DeepPartial } from 'typeorm';
@@ -23,6 +19,7 @@ export class PermissionsSeeder implements OnApplicationBootstrap {
   async onApplicationBootstrap(): Promise<void> {
     const controllers = this.discoveryService.getControllers();
     const permissionsMap = new Map<string, DeepPartial<Permission>>();
+    const globalPrefix = 'api';
 
     for (const wrapper of controllers) {
       const { instance } = wrapper;
@@ -45,7 +42,7 @@ export class PermissionsSeeder implements OnApplicationBootstrap {
         if (!routePath || methodNum === undefined) continue;
 
         const method = this.rules.methodMap[methodNum];
-        const fullPath = this.rules.normalizePath(`${controllerPath}/${routePath}`);
+        const fullPath = this.rules.normalizePath(`${globalPrefix}/${controllerPath}/${routePath}`);
 
         if (!method || !fullPath) continue;
 

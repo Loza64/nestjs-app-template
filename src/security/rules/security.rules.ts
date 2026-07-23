@@ -13,7 +13,7 @@ export class SecurityRules {
 
   private readonly authEndpoint: PathRule[] = [
     { path: '/api/auth/profile', methods: ['GET', 'PATCH'] },
-    { path: '/api/auth/profile/password', methods: ['PUT'] },
+    { path: '/api/auth/profile/password', methods: ['PATCH'] },
   ];
 
   public readonly methodMap: Readonly<Partial<Record<RequestMethod, string>>> = {

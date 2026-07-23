@@ -97,21 +97,10 @@ export class UserController {
   }
 
   @Delete(':id')
-  async delete(
-    @Param('id', ParseIntPipe) id: number,
-    @Profile() profile: User,
-  ): Promise<UserResponseDto> {
-    this.preventSelfAction(id, profile);
-    const user = await this.usersService.delete(id);
-    return UserMapper.toResponse(user);
-  }
-
-  @Patch(':id/soft-delete')
   @HttpCode(HttpStatus.OK)
   async softDelete(
     @Param('id', ParseIntPipe) id: number,
-    @Profile() profile: User,
-  ): Promise<UserResponseDto> {
+    @Profile() profile: User): Promise<UserResponseDto> {
     this.preventSelfAction(id, profile);
     const user = await this.usersService.softDelete(id);
     return UserMapper.toResponse(user);

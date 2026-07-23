@@ -68,12 +68,6 @@ export class RoleController {
   }
 
   @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
-    const role = await this.rolesService.delete(id);
-    return RoleMapper.toResponse(role);
-  }
-
-  @Patch(':id/soft-delete')
   @HttpCode(HttpStatus.OK)
   async softDelete(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
     const role = await this.rolesService.softDelete(id);
