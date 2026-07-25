@@ -18,6 +18,7 @@ import {
   SignUpDto,
   UpdateProfileDto,
 } from '../../domain/dto/payload.dto';
+import { RefreshTokenService } from 'src/modules/refresh_token/service/refresh-token.service';
 
 const DEFAULT_ROLE_ID = 1;
 
@@ -27,6 +28,7 @@ export class AuthService {
     @InjectRepository(User) private readonly repo: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly cryptoService: CryptoService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) { }
 
   private signToken(userId: number): string {
@@ -34,9 +36,8 @@ export class AuthService {
   }
 
   async signUp(data: SignUpDto): Promise<AuthResponseDto> {
-    const existing = await this.repo.findOne({
-      where: [{ username: data.username }, { email: data.email }],
-    });
+    const existing = await this.repo.findOne({ where: [{ username: data.username }, { email: data.email }] });
+
     if (existing) throw new ConflictException('Username o email ya están en uso');
 
     const hashedPassword = await this.cryptoService.encrypt(data.password);
@@ -48,9 +49,11 @@ export class AuthService {
     });
 
     const savedUser = await this.repo.save(user);
+    const refreshToken = await this.refreshTokenService.issue(savedUser);
 
     return {
       token: this.signToken(savedUser.id),
+      refreshToken,
       data: savedUser,
     };
   }
@@ -79,10 +82,27 @@ export class AuthService {
       throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
 
+    const refreshToken = await this.refreshTokenService.issue(user);
+
     return {
       token: this.signToken(user.id),
+      refreshToken,
       data: user,
     };
+  }
+
+  async refresh(incomingToken: string): Promise<AuthResponseDto> {
+    const { refreshToken, user } = await this.refreshTokenService.rotate(incomingToken);
+
+    return {
+      token: this.signToken(user.id),
+      refreshToken,
+      data: user,
+    };
+  }
+
+  async logout(incomingToken: string): Promise<void> {
+    await this.refreshTokenService.revoke(incomingToken);
   }
 
   async profile(id: number): Promise<User | null> {

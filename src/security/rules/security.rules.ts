@@ -9,6 +9,8 @@ export class SecurityRules {
   private readonly publicEndpoint: PathRule[] = [
     { path: '/api/auth/login', methods: ['POST'] },
     { path: '/api/auth/signup', methods: ['POST'] },
+    { path: '/api/auth/refresh', methods: ['POST'] },
+    { path: '/api/auth/logout', methods: ['POST'] },
   ];
 
   private readonly authEndpoint: PathRule[] = [

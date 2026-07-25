@@ -40,3 +40,9 @@ export class SignUpDto {
 }
 
 export class UpdateProfileDto extends PartialType(OmitType(SignUpDto, ['password'] as const)) { }
+
+export class RefreshTokenDto {
+  @IsNotEmpty({ message: 'El refresh token es obligatorio' })
+  @IsString()
+  refreshToken!: string;
+}

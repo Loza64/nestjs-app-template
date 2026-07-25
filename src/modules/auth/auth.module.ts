@@ -8,12 +8,14 @@ import { Permission } from '../permission/domain/entity/permission.entity';
 import { Role } from '../role/domain/entity/role.entity';
 import { User } from '../user/domain/entity/user.entity';
 import { CryptoModule } from 'src/integrations/crypto/crypto.module';
+import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
 
 @Module({
   imports: [
     ConfigModule,
     SecurityRulesModule,
     CryptoModule,
+    RefreshTokenModule,
     TypeOrmModule.forFeature([Permission, Role, User]),
   ],
   providers: [AuthService],

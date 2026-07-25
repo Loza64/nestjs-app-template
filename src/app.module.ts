@@ -13,6 +13,7 @@ import { JwtAuthGuard } from './security/jwt/jwt.guard';
 import { CryptoModule } from './integrations/crypto/crypto.module';
 import { TypeormModule } from './integrations/typeorm/typeorm.module';
 import { JsonwebtokenModule } from './integrations/jsonwebtoken/jsonwebtoken.module';
+import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { JsonwebtokenModule } from './integrations/jsonwebtoken/jsonwebtoken.mod
     SecurityRulesModule,
     UploadModule,
     UploadInterceptorModule,
+    RefreshTokenModule,
   ],
   controllers: [],
   providers: [
