@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CloudinaryService } from 'src/integrations/cloudinary/cloudinary.service';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
-import { Upload } from '../../domain/entity/upload.entity';
+import { Upload } from '../domain/entity/upload.entity';
 import 'multer';
 
 @Injectable()

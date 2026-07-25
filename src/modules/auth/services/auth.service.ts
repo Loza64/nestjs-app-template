@@ -11,14 +11,14 @@ import { Repository } from 'typeorm';
 
 import JwtPayload from 'src/common/models/jwt.payload';
 import { User } from 'src/modules/user/domain/entity/user.entity';
-import { AuthResponseDto } from '../../domain/dto/response.dto';
+import { AuthResponseDto } from '../domain/dto/response.dto';
 import { CryptoService } from 'src/integrations/crypto/crypto.service';
 import {
   ChangePasswordDto,
   SignUpDto,
   UpdateProfileDto,
-} from '../../domain/dto/payload.dto';
-import { RefreshTokenService } from 'src/modules/refresh_token/service/refresh-token.service';
+} from '../domain/dto/payload.dto';
+import { RefreshTokenService } from 'src/modules/refresh_token/service/refresh_token.service';
 
 const DEFAULT_ROLE_ID = 1;
 

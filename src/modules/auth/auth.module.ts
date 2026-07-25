@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './services/auth/auth.service';
-import { AuthController } from './controllers/auth/auth.controller';
 import { ConfigModule } from '@nestjs/config';
 import { SecurityRulesModule } from 'src/security/security.rules.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,6 +7,8 @@ import { Role } from '../role/domain/entity/role.entity';
 import { User } from '../user/domain/entity/user.entity';
 import { CryptoModule } from 'src/integrations/crypto/crypto.module';
 import { RefreshTokenModule } from '../refresh_token/refresh_token.module';
+import { AuthService } from './services/auth.service';
+import { AuthController } from './controller/auth.controller';
 
 @Module({
   imports: [

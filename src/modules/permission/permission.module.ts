@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PermissionService } from './services/permission/permission.service';
 import { Permission } from './domain/entity/permission.entity';
 import { DiscoveryModule } from '@nestjs/core';
 import { SecurityRulesModule } from 'src/security/security.rules.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PermissionsSeeder } from './seeders/permissions.seeder';
-import { PermissionController } from './controllers/permission/permission.controller';
+import { PermissionService } from './service/permission.service';
+import { PermissionController } from './controller/permission.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Permission]), DiscoveryModule, SecurityRulesModule],

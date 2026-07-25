@@ -6,7 +6,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable, catchError, from, switchMap, throwError } from 'rxjs';
-import { UploadService } from 'src/modules/upload/services/upload/upload.service';
+import { UploadService } from 'src/modules/upload/service/upload.service';
 
 @Injectable()
 export class CleanupOrphanPhotoInterceptor implements NestInterceptor {

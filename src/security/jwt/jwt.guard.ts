@@ -8,7 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import JwtPayload from 'src/common/models/jwt.payload';
-import { AuthService } from 'src/modules/auth/services/auth/auth.service';
+import { AuthService } from 'src/modules/auth/services/auth.service';
 import { SecurityRules } from 'src/security/rules/security.rules';
 
 interface RequestWithRoute extends Request {

@@ -5,9 +5,9 @@ import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } 
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { CryptoService } from 'src/integrations/crypto/crypto.service';
-import { User } from '../../domain/entity/user.entity';
-import { UploadService } from 'src/modules/upload/services/upload/upload.service';
-import { CreateUserDto, UpdateUserDto } from '../../domain/dto/payload.dto';
+import { User } from '../domain/entity/user.entity';
+import { CreateUserDto, UpdateUserDto } from '../domain/dto/payload.dto';
+import { UploadService } from 'src/modules/upload/service/upload.service';
 
 @Injectable()
 export class UserService implements ICrudService<User, CreateUserDto, UpdateUserDto> {

@@ -14,11 +14,11 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { UploadService } from '../../services/upload/upload.service';
+import { UploadService } from '../service/upload.service';
 import { UploadInterceptor } from 'src/common/interceptors/upload/upload.interceptor';
-import { CreateUploadDto } from '../../domain/dto/create.dto';
-import { UploadMapper } from '../../domain/mappers/upload.mapper';
-import { UploadResponseDto } from '../../domain/dto/response.dto';
+import { CreateUploadDto } from '../domain/dto/create.dto';
+import { UploadMapper } from '../domain/mappers/upload.mapper';
+import { UploadResponseDto } from '../domain/dto/response.dto';
 
 @Controller('uploads')
 export class UploadController {

@@ -12,14 +12,14 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { RoleService } from '../../services/role/role.service';
-import { CreateRoleDto, UpdateRoleDto } from '../../domain/dto/payload.dto';
 import BaseQuerys from 'src/common/dto/base-querys.dto';
 import { FindOptionsWhere, IsNull, Not } from 'typeorm';
-import { Role } from '../../domain/entity/role.entity';
-import { RoleMapper } from '../../domain/mappers/role.mapper';
-import { RoleResponseDto } from '../../domain/dto/response.dto';
 import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
+import { RoleService } from '../service/role.service';
+import { Role } from '../domain/entity/role.entity';
+import { RoleResponseDto } from '../domain/dto/response.dto';
+import { RoleMapper } from '../domain/mappers/role.mapper';
+import { CreateRoleDto, UpdateRoleDto } from '../domain/dto/payload.dto';
 
 @Controller('roles')
 export class RoleController {

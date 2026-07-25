@@ -14,16 +14,16 @@ import {
   HttpStatus,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from '../../services/user/user.service';
-import { User } from '../../domain/entity/user.entity';
-import { querys } from '../../domain/dto/querys';
 import { FindOptionsWhere, IsNull, Not } from 'typeorm';
-import { CreateUserDto, UpdateUserDto } from '../../domain/dto/payload.dto';
 import { Profile } from 'src/common/decorators/profile';
 import { parseSearch, parseSort } from 'src/common/helpers/entities.parse';
-import { CleanupOrphanPhotoInterceptor } from '../../interceptors/cleanup-orphan-photo/cleanup-orphan-photo.interceptor';
-import { UserMapper } from '../../domain/mappers/user.mapper';
-import { UserResponseDto } from '../../domain/dto/response.dto';
+import { UserService } from '../service/user.service';
+import { User } from '../domain/entity/user.entity';
+import { querys } from '../domain/dto/querys';
+import { UserMapper } from '../domain/mappers/user.mapper';
+import { UserResponseDto } from '../domain/dto/response.dto';
+import { CleanupOrphanPhotoInterceptor } from '../interceptors/cleanup-orphan-photo/cleanup-orphan-photo.interceptor';
+import { CreateUserDto, UpdateUserDto } from '../domain/dto/payload.dto';
 
 @Controller('users')
 export class UserController {

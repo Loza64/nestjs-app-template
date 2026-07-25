@@ -1,6 +1,5 @@
 import { Body, Controller, Get, HttpCode, Patch, Post } from '@nestjs/common';
-import { AuthService } from '../../services/auth/auth.service';
-import { AuthResponseDto } from '../../domain/dto/response.dto';
+import { AuthResponseDto } from '../domain/dto/response.dto';
 import { User } from 'src/modules/user/domain/entity/user.entity';
 import { Profile } from 'src/common/decorators/profile';
 import {
@@ -9,9 +8,10 @@ import {
   RefreshTokenDto,
   SignUpDto,
   UpdateProfileDto,
-} from '../../domain/dto/payload.dto';
+} from '../domain/dto/payload.dto';
 import { UserMapper } from 'src/modules/user/domain/mappers/user.mapper';
 import { UserResponseDto } from 'src/modules/user/domain/dto/response.dto';
+import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
 export class AuthController {
