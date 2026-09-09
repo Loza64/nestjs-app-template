@@ -1,6 +1,5 @@
 export class PermissionResponseDto {
   id!: number;
-  path!: string;
-  method!: string;
+  name!: string;
   title!: string | null;
 }

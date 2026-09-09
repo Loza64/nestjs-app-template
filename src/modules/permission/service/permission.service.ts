@@ -13,14 +13,14 @@ export class PermissionService {
   ) { }
 
   async create(data: DeepPartial<Permission>): Promise<Permission> {
-    await this.permissionRepo.upsert(data, ['path', 'method']);
+    await this.permissionRepo.upsert(data, ['name']);
     return this.permissionRepo.findOneOrFail({
-      where: { path: data.path as string, method: data.method as string },
+      where: { name: data.name as string },
     });
   }
 
   async upsert(data: DeepPartial<Permission>): Promise<void> {
-    await this.permissionRepo.upsert(data, ['path', 'method']);
+    await this.permissionRepo.upsert(data, ['name']);
   }
 
   async update({ id, data, }: { id: number; data: DeepPartial<Permission> }): Promise<Permission> {

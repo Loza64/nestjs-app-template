@@ -19,12 +19,15 @@ import { UploadInterceptor } from 'src/common/interceptors/upload/upload.interce
 import { CreateUploadDto } from '../domain/dto/create.dto';
 import { UploadMapper } from '../domain/mappers/upload.mapper';
 import { UploadResponseDto } from '../domain/dto/response.dto';
+import { PreAuthorized } from 'src/common/decorators/pre-authorized';
+import { PERMISSIONS } from 'src/common/constants/permissions';
 
 @Controller('uploads')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) { }
 
   @Post()
+  @PreAuthorized(PERMISSIONS.CREATE_UPLOAD)
   @UseInterceptors(
     FileInterceptor('file', { storage: memoryStorage() }),
     UploadInterceptor,
@@ -38,6 +41,7 @@ export class UploadController {
   }
 
   @Post('/many')
+  @PreAuthorized(PERMISSIONS.CREATE_UPLOAD)
   @UseInterceptors(
     FilesInterceptor('files', 10, { storage: memoryStorage() }),
     UploadInterceptor,
@@ -51,6 +55,7 @@ export class UploadController {
   }
 
   @Delete(':id')
+  @PreAuthorized(PERMISSIONS.DELETE_UPLOAD)
   @HttpCode(HttpStatus.OK)
   async deleteFile(@Param('id') id: number): Promise<UploadResponseDto> {
     const upload = await this.uploadService.deleteFile(id);
@@ -58,6 +63,7 @@ export class UploadController {
   }
 
   @Get(':id')
+  @PreAuthorized(PERMISSIONS.READ_UPLOAD)
   @HttpCode(HttpStatus.OK)
   async findById(@Param('id') id: number): Promise<UploadResponseDto> {
     const upload = await this.uploadService.findById(id);
@@ -65,6 +71,7 @@ export class UploadController {
   }
 
   @Get()
+  @PreAuthorized(PERMISSIONS.READ_UPLOAD)
   @HttpCode(HttpStatus.OK)
   async findAll(@Query('page') page = 1, @Query('size') size = 10) {
     const result = await this.uploadService.findBy({ page: Number(page), size: Number(size) });

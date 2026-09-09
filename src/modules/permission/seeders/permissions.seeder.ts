@@ -1,62 +1,20 @@
-import { Injectable, OnApplicationBootstrap, RequestMethod } from '@nestjs/common';
-import { DiscoveryService, Reflector } from '@nestjs/core';
-import { PATH_METADATA, METHOD_METADATA } from '@nestjs/common/constants';
-import { DeepPartial } from 'typeorm';
-import { SecurityRules } from 'src/security/rules/security.rules';
-import { Permission } from '../domain/entity/permission.entity';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { PERMISSIONS } from '../../../common/constants/permissions';
 import { PermissionService } from '../service/permission.service';
 
 @Injectable()
 export class PermissionsSeeder implements OnApplicationBootstrap {
 
   constructor(
-    private readonly discoveryService: DiscoveryService,
-    private readonly reflector: Reflector,
-    private readonly permissionsService: PermissionService,
-    private readonly rules: SecurityRules
+    private readonly permissionsService: PermissionService
   ) { }
 
   async onApplicationBootstrap(): Promise<void> {
-    const controllers = this.discoveryService.getControllers();
-    const permissionsMap = new Map<string, DeepPartial<Permission>>();
-    const globalPrefix = 'api';
-
-    for (const wrapper of controllers) {
-      const { instance } = wrapper;
-      if (!instance) continue;
-
-      const prototype = Object.getPrototypeOf(instance);
-      const controllerPath = this.rules.normalizePath(
-        this.reflector.get<string>(PATH_METADATA, instance.constructor)
-      );
-
-      for (const methodName of Object.getOwnPropertyNames(prototype)) {
-        if (methodName === 'constructor') continue;
-
-        const handler = prototype[methodName];
-        if (typeof handler !== 'function') continue;
-
-        const routePath = this.reflector.get<string>(PATH_METADATA, handler);
-        const methodNum = this.reflector.get<RequestMethod>(METHOD_METADATA, handler);
-
-        if (!routePath || methodNum === undefined) continue;
-
-        const method = this.rules.methodMap[methodNum];
-        const fullPath = this.rules.normalizePath(`${globalPrefix}/${controllerPath}/${routePath}`);
-
-        if (!method || !fullPath) continue;
-
-        if (this.rules.isPublicEndpoint(fullPath, method)) continue;
-        if (this.rules.isAuthEndpoint(fullPath, method)) continue;
-
-        const key = `${method}:${fullPath}`;
-        permissionsMap.set(key, { path: fullPath, method });
-      }
-    }
+    const permissionNames: string[] = Object.values(PERMISSIONS);
 
     await Promise.allSettled(
-      [...permissionsMap.values()].map((permission) =>
-        this.permissionsService.upsert(permission),
+      permissionNames.map((name) =>
+        this.permissionsService.upsert({ name }),
       ),
     );
   }

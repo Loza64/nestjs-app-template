@@ -20,12 +20,15 @@ import { Role } from '../domain/entity/role.entity';
 import { RoleResponseDto } from '../domain/dto/response.dto';
 import { RoleMapper } from '../domain/mappers/role.mapper';
 import { CreateRoleDto, UpdateRoleDto } from '../domain/dto/payload.dto';
+import { PreAuthorized } from 'src/common/decorators/pre-authorized';
+import { PERMISSIONS } from '../../../common/constants/permissions';
 
 @Controller('roles')
 export class RoleController {
   constructor(private readonly rolesService: RoleService) { }
 
   @Get()
+  @PreAuthorized(PERMISSIONS.READ_ROLE)
   @HttpCode(HttpStatus.OK)
   async findAll(@Query() query: BaseQuerys) {
     const { page, size, deleted, search, sort } = query;
@@ -48,6 +51,7 @@ export class RoleController {
   }
 
   @Get(':id')
+  @PreAuthorized(PERMISSIONS.READ_ROLE)
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
     const role = await this.rolesService.findOneBy({ filters: { id }, relations: { permissions: true } });
@@ -55,12 +59,14 @@ export class RoleController {
   }
 
   @Post()
+  @PreAuthorized(PERMISSIONS.CREATE_ROLE)
   async create(@Body() data: CreateRoleDto): Promise<RoleResponseDto> {
     const role = await this.rolesService.create(data);
     return RoleMapper.toResponse(role);
   }
 
   @Put(':id')
+  @PreAuthorized(PERMISSIONS.UPDATE_ROLE)
   @HttpCode(HttpStatus.OK)
   async update(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateRoleDto): Promise<RoleResponseDto> {
     const role = await this.rolesService.update({ id, data });
@@ -68,6 +74,7 @@ export class RoleController {
   }
 
   @Delete(':id')
+  @PreAuthorized(PERMISSIONS.DELETE_ROLE)
   @HttpCode(HttpStatus.OK)
   async softDelete(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
     const role = await this.rolesService.softDelete(id);
@@ -75,6 +82,7 @@ export class RoleController {
   }
 
   @Patch(':id/restore')
+  @PreAuthorized(PERMISSIONS.RESTORE_ROLE)
   @HttpCode(HttpStatus.OK)
   async restore(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
     const role = await this.rolesService.softRestore(id);

@@ -56,13 +56,13 @@ export class RoleService implements ICrudService<Role, CreateRoleDto, UpdateRole
 
   async softDelete(id: number): Promise<Role> {
     await this.repo.softDelete(id);
-    return await this.repo.findOneOrFail({ where: { id }, withDeleted: true });
+    return this.repo.findOneOrFail({ where: { id }, withDeleted: true });
   }
 
   async softRestore(id: number): Promise<Role> {
     const result = await this.repo.restore(id);
     if (!result.affected) throw new NotFoundException(`Role ${id} no existe`);
-    return await this.repo.findOneByOrFail({ id });
+    return this.repo.findOneByOrFail({ id });
   }
 
   async findOneBy(params: {

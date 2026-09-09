@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DiscoveryService, Reflector } from '@nestjs/core';
 import { PermissionsSeeder } from './permissions.seeder';
 import { PermissionService } from '../service/permission.service';
-import { SecurityRules } from 'src/security/rules/security.rules';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 describe('PermissionsSeeder', () => {
@@ -13,30 +11,9 @@ describe('PermissionsSeeder', () => {
       providers: [
         PermissionsSeeder,
         {
-          provide: DiscoveryService,
-          useValue: {
-            getControllers: jest.fn(),
-          },
-        },
-        {
-          provide: Reflector,
-          useValue: {
-            get: jest.fn(),
-          },
-        },
-        {
           provide: PermissionService,
           useValue: {
             upsert: jest.fn(),
-          },
-        },
-        {
-          provide: SecurityRules,
-          useValue: {
-            normalizePath: jest.fn(),
-            isPublicEndpoint: jest.fn(),
-            isAuthEndpoint: jest.fn(),
-            methodMap: {},
           },
         },
       ],

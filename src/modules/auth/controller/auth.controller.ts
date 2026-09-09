@@ -12,12 +12,14 @@ import {
 import { UserMapper } from 'src/modules/user/domain/mappers/user.mapper';
 import { UserResponseDto } from 'src/modules/user/domain/dto/response.dto';
 import { AuthService } from '../services/auth.service';
+import { Public } from 'src/common/decorators/public';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('login')
+  @Public()
   async login(@Body() data: LoginDto): Promise<AuthResponseDto> {
     const session = await this.authService.login(data.username, data.password);
     return {
@@ -28,6 +30,7 @@ export class AuthController {
   }
 
   @Post('signup')
+  @Public()
   async signUp(@Body() data: SignUpDto): Promise<AuthResponseDto> {
     const session = await this.authService.signUp(data);
     return {
@@ -38,6 +41,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Public()
   async refresh(@Body() data: RefreshTokenDto): Promise<AuthResponseDto> {
     const session = await this.authService.refresh(data.refreshToken);
     return {
@@ -48,6 +52,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @Public()
   @HttpCode(204)
   async logout(@Body() data: RefreshTokenDto): Promise<void> {
     await this.authService.logout(data.refreshToken);

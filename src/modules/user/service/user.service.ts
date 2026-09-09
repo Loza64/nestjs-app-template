@@ -45,13 +45,13 @@ export class UserService implements ICrudService<User, CreateUserDto, UpdateUser
 
   async softDelete(id: number): Promise<User> {
     await this.repo.softDelete(id);
-    return await this.repo.findOneOrFail({ where: { id }, withDeleted: true });
+    return this.repo.findOneOrFail({ where: { id }, withDeleted: true });
   }
 
   async softRestore(id: number): Promise<User> {
     const result = await this.repo.restore(id);
     if (!result.affected) throw new NotFoundException(`User ${id} no existe`);
-    return await this.repo.findOneByOrFail({ id });
+    return this.repo.findOneByOrFail({ id });
   }
 
   async findOneBy(params: {

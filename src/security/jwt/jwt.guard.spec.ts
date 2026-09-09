@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from './jwt.guard';
-import { AuthService } from 'src/modules/auth/services/auth.service';
-import { SecurityRules } from 'src/security/rules/security.rules';
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { Reflector } from '@nestjs/core';
+import { beforeEach, describe, expect, it, } from '@jest/globals';
 
 describe('JwtAuthGuard', () => {
   let guard: JwtAuthGuard;
@@ -12,25 +10,7 @@ describe('JwtAuthGuard', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         JwtAuthGuard,
-        {
-          provide: JwtService,
-          useValue: {
-            verify: jest.fn(),
-          },
-        },
-        {
-          provide: AuthService,
-          useValue: {
-            profile: jest.fn(),
-          },
-        },
-        {
-          provide: SecurityRules,
-          useValue: {
-            isPublicEndpoint: jest.fn(),
-            isAuthEndpoint: jest.fn(),
-          },
-        },
+        Reflector,
       ],
     }).compile();
 

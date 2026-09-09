@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class PermissionUpdateDto {
-  @IsNotEmpty({ message: 'El titulo es obligatorio' })
+  @IsOptional()
   @IsString()
-  title?: string;
+  title?: string | null;
 }

@@ -64,9 +64,8 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
 
 ### Seguridad y reglas
 
-- `src/security/jwt/jwt.guard.ts` — guard global que valida JWT y permisos de rutas
-- `src/security/rules/security.rules.ts` — reglas de seguridad para endpoints públicos y autenticados
-- `src/security/security.rules.module.ts` — módulo que exporta `SecurityRules`
+- `src/security/jwt/jwt.guard.ts` — guard global que valida JWT
+- `src/security/permission/permissions.guard.ts` — guard global que valida permisos
 
 ### Módulos de dominio
 
@@ -83,7 +82,7 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
 - Carga `ConfigModule` en modo global para variables de entorno.
 - Conecta a PostgreSQL con `TypeOrmModule.forRootAsync`.
 - Registra `JwtModule` global usando configuración de `ConfigService`.
-- Importa módulos centrales: `CloudinaryModule`, `AuthModule`, `UserModule`, `RoleModule`, `PermissionModule`, `SecurityRulesModule`, `UploadModule`, `UploadInterceptorModule`, `CryptoModule`.
+- Importa módulos centrales: `CloudinaryModule`, `AuthModule`, `UserModule`, `RoleModule`, `PermissionModule`, `UploadModule`, `UploadInterceptorModule`, `CryptoModule`.
 - Declara el guard global `JwtAuthGuard` mediante `APP_GUARD`.
 
 ### Autenticación y sesión
@@ -106,18 +105,9 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
 - Valida la presencia del header `Authorization: Bearer ...`
 - Verifica el token JWT con `JwtService`
 - Consulta el usuario activo y detecta cuentas bloqueadas o eliminadas
-- Permite rutas públicas definidas en `SecurityRules`
-- Permite rutas autenticadas sin permisos especiales (`/api/auth/profile`)
-- Verifica permisos contra la ruta y método HTTP del usuario
-
-#### `SecurityRules`
-
-- Define endpoints públicos:
-  - `/api/auth/login` [POST]
-  - `/api/auth/signup` [POST]
-- Define endpoint autenticado:
-  - `/api/auth/profile` [GET, PUT]
-- Provee normalización de rutas y comprobación de reglas.
+ - Todos los endpoints son privados por defecto mediante `JwtAuthGuard`.
+ - `@Public()` permite explícitamente un endpoint sin autenticación.
+ - `@PreAuthorized(PERMISSIONS.READ_PERMISSION)` exige JWT y la clave indicada en el permiso.
 
 ### Gestión de usuarios
 
@@ -152,7 +142,7 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
 
 - `PermissionController` y `PermissionService` gestionan permisos.
 - Incluye `PermissionsSeeder` para poblar permisos iniciales.
-- Importa `SecurityRulesModule` y `DiscoveryModule`.
+- Importa `DiscoveryModule` para descubrir los permisos declarados con `@PreAuthorized()`.
 
 #### Entidades principales
 
@@ -162,8 +152,7 @@ Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript
   - relación ManyToMany con `Permission`
 
 - `Permission` (`src/modules/permission/domain/entity/permission.entity.ts`):
-  - `path`
-  - `method`
+  - `name`
   - `title`
 
 ### Subida de archivos y Cloudinary
@@ -419,11 +408,11 @@ Este patrón es similar al de `UserService` en el proyecto. Mantiene la lógica 
 - Añadir un módulo de configuración `.env.example` y validación de variables.
 - Proteger la eliminación de archivos con auditoría si se requiere histórico.
 - Añadir validaciones con DTOs usando `class-validator` en los controladores de usuario, rol y permiso.
-- Centralizar las rutas de permisos y roles en un servicio de autorización más completo si el proyecto crece.
+- Centralizar las claves de permisos y roles en un servicio de autorización más completo si el proyecto crece.
 
 ## Notas importantes
 
-- La seguridad actual depende de la ruta y método exactos en la entidad `Permission`.
+- La seguridad usa claves explícitas declaradas con `@PreAuthorized()`; `Permission` solo almacena `name` y `title`.
 - El guard JWT revisa `request.route.path` y compara con reglas de permiso.
 - El decorador `@Profile()` asume que el `JwtAuthGuard` ya inyectó `request.user`.
 - `UploadInterceptor` usa tipos MIME configurados en `src/common/constants/mime-types.ts`.

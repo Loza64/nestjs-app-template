@@ -7,8 +7,7 @@ export class PermissionMapper {
   static toResponse(entity: Permission): PermissionResponseDto {
     return {
       id: entity.id,
-      path: entity.path,
-      method: entity.method,
+      name: entity.name,
       title: entity.title,
     };
   }

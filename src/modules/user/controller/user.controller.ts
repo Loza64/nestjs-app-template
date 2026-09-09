@@ -24,6 +24,8 @@ import { UserMapper } from '../domain/mappers/user.mapper';
 import { UserResponseDto } from '../domain/dto/response.dto';
 import { CleanupOrphanPhotoInterceptor } from '../interceptors/cleanup-orphan-photo/cleanup-orphan-photo.interceptor';
 import { CreateUserDto, UpdateUserDto } from '../domain/dto/payload.dto';
+import { PreAuthorized } from 'src/common/decorators/pre-authorized';
+import { PERMISSIONS } from '../../../common/constants/permissions';
 
 @Controller('users')
 export class UserController {
@@ -34,6 +36,7 @@ export class UserController {
   }
 
   @Get()
+  @PreAuthorized(PERMISSIONS.READ_USER)
   @HttpCode(HttpStatus.OK)
   async findAll(@Query() query: querys) {
     const { page = 1, size = 20, search, blocked, role, deleted, sort } = query;
@@ -64,6 +67,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @PreAuthorized(PERMISSIONS.READ_USER)
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
     const user = await this.usersService.findOneBy({
@@ -78,6 +82,7 @@ export class UserController {
 
   @UseInterceptors(CleanupOrphanPhotoInterceptor)
   @Post()
+  @PreAuthorized(PERMISSIONS.CREATE_USER)
   async create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     const user = await this.usersService.create(dto);
     return UserMapper.toResponse(user);
@@ -85,6 +90,7 @@ export class UserController {
 
   @UseInterceptors(CleanupOrphanPhotoInterceptor)
   @Put(':id')
+  @PreAuthorized(PERMISSIONS.UPDATE_USER)
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -97,6 +103,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @PreAuthorized(PERMISSIONS.DELETE_USER)
   @HttpCode(HttpStatus.OK)
   async softDelete(
     @Param('id', ParseIntPipe) id: number,
@@ -107,6 +114,7 @@ export class UserController {
   }
 
   @Patch(':id/restore')
+  @PreAuthorized(PERMISSIONS.RESTORE_USER)
   @HttpCode(HttpStatus.OK)
   async restore(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
     const user = await this.usersService.softRestore(id);
