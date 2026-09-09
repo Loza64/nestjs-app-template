@@ -7,9 +7,13 @@ import { UploadService } from './service/upload.service';
 import { UploadController } from './controller/upload.controller';
 
 @Module({
-  imports: [CloudinaryModule, UploadInterceptorModule, TypeOrmModule.forFeature([Upload])],
+  imports: [
+    CloudinaryModule,
+    UploadInterceptorModule,
+    TypeOrmModule.forFeature([Upload]),
+  ],
   providers: [UploadService],
   controllers: [UploadController],
-  exports: [UploadService]
+  exports: [UploadService],
 })
-export class UploadModule { }
+export class UploadModule {}

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CloudinaryService } from 'src/integrations/cloudinary/cloudinary.service';
@@ -9,14 +13,13 @@ import 'multer';
 
 @Injectable()
 export class UploadService {
-
   private readonly folder = 'nestjs-app-template';
 
   constructor(
     @InjectRepository(Upload)
     private readonly uploadRepo: Repository<Upload>,
     private readonly mediaService: CloudinaryService,
-  ) { }
+  ) {}
 
   private getResourceType(mimetype: string): 'image' | 'video' | 'raw' {
     if (mimetype.startsWith('video/')) return 'video';
@@ -36,14 +39,11 @@ export class UploadService {
       use_filename: true,
       unique_filename: true,
       overwrite: false,
-      ...(
-        isImage &&
-        {
-          colors: true,
-          faces: true,
-          eager: [{ width: 400, height: 400, crop: 'fill', gravity: 'auto' }],
-        }
-      ),
+      ...(isImage && {
+        colors: true,
+        faces: true,
+        eager: [{ width: 400, height: 400, crop: 'fill', gravity: 'auto' }],
+      }),
     });
 
     const upload = this.uploadRepo.create({
@@ -60,19 +60,23 @@ export class UploadService {
       placeholder: result.placeholder ?? false,
       phash: result.phash ?? null,
       colors: (result.colors as string[][] | null) ?? null,
-      faces: (result.faces) ?? null,
-      predominant: (result.predominant) ?? null,
-      eager: result.eager?.map((e) => ({
-        url: e.url,
-        secureUrl: e.secure_url,
-        width: e.width,
-        height: e.height,
-      })) ?? null,
+      faces: result.faces ?? null,
+      predominant: result.predominant ?? null,
+      eager:
+        result.eager?.map((e) => ({
+          url: e.url,
+          secureUrl: e.secure_url,
+          width: e.width,
+          height: e.height,
+        })) ?? null,
     });
     return this.uploadRepo.save(upload);
   }
 
-  async uploadManyFiles(files: Express.Multer.File[], tags: string[]): Promise<Upload[]> {
+  async uploadManyFiles(
+    files: Express.Multer.File[],
+    tags: string[],
+  ): Promise<Upload[]> {
     return Promise.all(files.map((file) => this.uploadFile(file, tags)));
   }
 
@@ -87,12 +91,18 @@ export class UploadService {
   }
 
   async findById(id: number): Promise<Upload> {
-    const upload = await this.uploadRepo.findOne({ where: { id }, relations: { user: true } });
+    const upload = await this.uploadRepo.findOne({
+      where: { id },
+      relations: { user: true },
+    });
     if (!upload) throw new NotFoundException(`File with id ${id} not found`);
     return upload;
   }
 
-  async findBy(params: { page: number; size: number }): Promise<PaginationParser<Upload>> {
+  async findBy(params: {
+    page: number;
+    size: number;
+  }): Promise<PaginationParser<Upload>> {
     const result = await paginate<Upload>(
       this.uploadRepo,
       { page: params.page, limit: params.size },

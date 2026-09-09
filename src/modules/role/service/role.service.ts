@@ -2,7 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ICrudService } from 'src/common/service/crud.service';
 import { Role } from '../domain/entity/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, In, Repository } from 'typeorm';
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  In,
+  Repository,
+} from 'typeorm';
 import { Permission } from 'src/modules/permission/domain/entity/permission.entity';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
@@ -10,12 +16,16 @@ import { CreateRoleDto, UpdateRoleDto } from '../domain/dto/payload.dto';
 import { PermissionService } from 'src/modules/permission/service/permission.service';
 
 @Injectable()
-export class RoleService implements ICrudService<Role, CreateRoleDto, UpdateRoleDto> {
+export class RoleService implements ICrudService<
+  Role,
+  CreateRoleDto,
+  UpdateRoleDto
+> {
   constructor(
     @InjectRepository(Role)
     private readonly repo: Repository<Role>,
     private readonly permissionService: PermissionService,
-  ) { }
+  ) {}
 
   private async resolvePermissions(ids: number[]): Promise<Permission[]> {
     if (!ids.length) return [];
@@ -36,8 +46,17 @@ export class RoleService implements ICrudService<Role, CreateRoleDto, UpdateRole
     return this.repo.save(role);
   }
 
-  async update({ id, data }: { id: number; data: UpdateRoleDto }): Promise<Role> {
-    const role = await this.findOneBy({ filters: { id }, relations: { permissions: true } });
+  async update({
+    id,
+    data,
+  }: {
+    id: number;
+    data: UpdateRoleDto;
+  }): Promise<Role> {
+    const role = await this.findOneBy({
+      filters: { id },
+      relations: { permissions: true },
+    });
     const { permissions: permissionsDto, ...rest } = data;
     Object.assign(role, rest);
     if (permissionsDto) {
@@ -88,12 +107,19 @@ export class RoleService implements ICrudService<Role, CreateRoleDto, UpdateRole
     const result = await paginate<Role>(
       this.repo,
       { page: params.page, limit: params.size },
-      { where: params.filters, relations: params.relations, order: params.order, withDeleted: params.withDeleted },
+      {
+        where: params.filters,
+        relations: params.relations,
+        order: params.order,
+        withDeleted: params.withDeleted,
+      },
     );
     return new PaginationParser(result);
   }
 
-  async count(filters?: FindOptionsWhere<Role> | FindOptionsWhere<Role>[]): Promise<number> {
+  async count(
+    filters?: FindOptionsWhere<Role> | FindOptionsWhere<Role>[],
+  ): Promise<number> {
     return this.repo.count({ where: filters });
   }
 }

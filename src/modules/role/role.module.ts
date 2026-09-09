@@ -9,6 +9,6 @@ import { RoleController } from './controller/role.controller';
 @Module({
   imports: [TypeOrmModule.forFeature([Role]), PermissionModule],
   providers: [RoleService, RolesSeeder],
-  controllers: [RoleController]
+  controllers: [RoleController],
 })
-export class RoleModule { }
+export class RoleModule {}

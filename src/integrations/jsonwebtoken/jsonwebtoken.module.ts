@@ -16,6 +16,6 @@ import { JwtModule } from '@nestjs/jwt';
         },
       }),
     }),
-  ]
+  ],
 })
-export class JsonwebtokenModule { }
+export class JsonwebtokenModule {}

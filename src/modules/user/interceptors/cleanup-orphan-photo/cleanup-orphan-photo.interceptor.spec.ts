@@ -20,7 +20,9 @@ describe('CleanupOrphanPhotoInterceptor', () => {
       ],
     }).compile();
 
-    interceptor = module.get<CleanupOrphanPhotoInterceptor>(CleanupOrphanPhotoInterceptor);
+    interceptor = module.get<CleanupOrphanPhotoInterceptor>(
+      CleanupOrphanPhotoInterceptor,
+    );
   });
 
   it('should be defined', () => {

@@ -30,9 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     if (user.deletedAt !== null) {
-      throw new UnauthorizedException(
-        'This account is currently deactivated.',
-      );
+      throw new UnauthorizedException('This account is currently deactivated.');
     }
 
     if (user.blocked) {

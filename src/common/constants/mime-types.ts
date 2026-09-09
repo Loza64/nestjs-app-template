@@ -1,4 +1,3 @@
-
 export const allowedMimeTypes = [
   /* ===================== IMAGES ===================== */
   'image/jpeg',

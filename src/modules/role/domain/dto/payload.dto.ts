@@ -20,7 +20,7 @@ export class CreateRoleDto {
 
   @IsBoolean()
   @IsNotEmpty()
-  active?: boolean
+  active?: boolean;
 
   @IsOptional()
   @IsArray()
@@ -30,4 +30,4 @@ export class CreateRoleDto {
   permissions?: IdDto[];
 }
 
-export class UpdateRoleDto extends PartialType(CreateRoleDto) { }
+export class UpdateRoleDto extends PartialType(CreateRoleDto) {}

@@ -10,7 +10,7 @@ import { UploadService } from 'src/modules/upload/service/upload.service';
 
 @Injectable()
 export class CleanupOrphanPhotoInterceptor implements NestInterceptor {
-  constructor(private readonly uploadService: UploadService) { }
+  constructor(private readonly uploadService: UploadService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = context.switchToHttp().getRequest();

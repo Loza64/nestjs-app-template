@@ -4,7 +4,6 @@ import { Entity, Column, OneToOne } from 'typeorm';
 
 @Entity('uploads')
 export class Upload extends BaseEntity {
-
   @OneToOne(() => User, (user) => user.photo)
   user: User | null = null;
 
@@ -48,7 +47,9 @@ export class Upload extends BaseEntity {
   predominant: object | null = null;
 
   @Column({ type: 'jsonb', nullable: true })
-  eager: { url: string; secureUrl: string; width: number; height: number }[] | null = null;
+  eager:
+    | { url: string; secureUrl: string; width: number; height: number }[]
+    | null = null;
 
   @Column({ type: 'text', array: true, nullable: true })
   tags: string[] | null = null;

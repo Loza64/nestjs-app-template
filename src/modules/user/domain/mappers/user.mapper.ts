@@ -18,7 +18,7 @@ export class UserMapper {
       photo: entity.photo ? UploadMapper.toResponse(entity.photo) : null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      deletedAt: entity.deletedAt
+      deletedAt: entity.deletedAt,
     };
   }
 
@@ -26,7 +26,9 @@ export class UserMapper {
     return entities.map((e) => this.toResponse(e));
   }
 
-  static toPaginatedResponse(pagination: PaginationParser<User>): PaginatedResponseDto<UserResponseDto> {
+  static toPaginatedResponse(
+    pagination: PaginationParser<User>,
+  ): PaginatedResponseDto<UserResponseDto> {
     return new PaginatedResponseDto(
       this.toResponseList(pagination.data),
       pagination.pagination,

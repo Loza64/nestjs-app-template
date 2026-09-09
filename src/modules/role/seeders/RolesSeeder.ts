@@ -13,7 +13,7 @@ export class RolesSeeder implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(Role)
     private readonly repo: Repository<Role>,
-  ) { }
+  ) {}
 
   async onApplicationBootstrap(): Promise<void> {
     await this.repo.upsert(DEFAULT_ROLES, {

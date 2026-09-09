@@ -1,7 +1,16 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ICrudService } from 'src/common/service/crud.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { CryptoService } from 'src/integrations/crypto/crypto.service';
@@ -10,30 +19,47 @@ import { CreateUserDto, UpdateUserDto } from '../domain/dto/payload.dto';
 import { UploadService } from 'src/modules/upload/service/upload.service';
 
 @Injectable()
-export class UserService implements ICrudService<User, CreateUserDto, UpdateUserDto> {
+export class UserService implements ICrudService<
+  User,
+  CreateUserDto,
+  UpdateUserDto
+> {
   constructor(
     @InjectRepository(User) private readonly repo: Repository<User>,
     private readonly upload: UploadService,
     private readonly cryptoService: CryptoService,
-  ) { }
+  ) {}
 
   async create(data: CreateUserDto): Promise<User> {
-    const existing = await this.repo.findOne({ where: [{ username: data.username }, { email: data.email }] });
-    if (existing) throw new ConflictException('Username o email ya están en uso');
+    const existing = await this.repo.findOne({
+      where: [{ username: data.username }, { email: data.email }],
+    });
+    if (existing)
+      throw new ConflictException('Username o email ya están en uso');
 
     const hashedPassword = await this.cryptoService.encrypt(data.password);
     const user = this.repo.create({ ...data, password: hashedPassword });
     return this.repo.save(user);
   }
 
-  async update({ id, data }: { id: number; data: UpdateUserDto }): Promise<User> {
-    const user = await this.findOneBy({ filters: { id }, relations: { photo: true } });
+  async update({
+    id,
+    data,
+  }: {
+    id: number;
+    data: UpdateUserDto;
+  }): Promise<User> {
+    const user = await this.findOneBy({
+      filters: { id },
+      relations: { photo: true },
+    });
     const { photo: newPhoto, ...rest } = data;
     Object.assign(user, rest);
     const oldPhotoId = user.photo?.id;
     if (newPhoto) user.photo = { id: newPhoto.id } as User['photo'];
     const savedUser = await this.repo.save(user);
-    if (newPhoto?.id && oldPhotoId && newPhoto.id !== oldPhotoId) await this.upload.deleteFile(oldPhotoId)
+    if (newPhoto?.id && oldPhotoId && newPhoto.id !== oldPhotoId)
+      await this.upload.deleteFile(oldPhotoId);
     return savedUser;
   }
 
@@ -77,12 +103,19 @@ export class UserService implements ICrudService<User, CreateUserDto, UpdateUser
     const result = await paginate<User>(
       this.repo,
       { page: params.page, limit: params.size },
-      { where: params.filters, relations: params.relations, order: params.order, withDeleted: params.withDeleted },
+      {
+        where: params.filters,
+        relations: params.relations,
+        order: params.order,
+        withDeleted: params.withDeleted,
+      },
     );
     return new PaginationParser(result);
   }
 
-  async count(filters?: FindOptionsWhere<User> | FindOptionsWhere<User>[]): Promise<number> {
+  async count(
+    filters?: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+  ): Promise<number> {
     return this.repo.count({ where: filters });
   }
 }

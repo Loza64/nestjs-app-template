@@ -4,7 +4,6 @@ import { User } from 'src/modules/user/domain/entity/user.entity';
 
 @Entity('refresh_tokens')
 export class RefreshToken extends BaseEntity {
-
   @Column({ type: 'varchar', unique: true, nullable: false })
   @Index()
   token!: string; // hash sha256 del refresh token

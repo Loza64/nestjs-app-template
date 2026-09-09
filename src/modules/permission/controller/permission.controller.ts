@@ -1,4 +1,17 @@
-import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Put, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Put,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { PermissionUpdateDto } from '../domain/dto/permision.update.dto';
 import { PermissionMapper } from '../domain/mappers/permission.mapper';
 import { PermissionResponseDto } from '../domain/dto/response.dto';
@@ -8,7 +21,7 @@ import { PERMISSIONS } from 'src/common/constants/permissions';
 
 @Controller('/permissions')
 export class PermissionController {
-  constructor(private readonly service: PermissionService) { }
+  constructor(private readonly service: PermissionService) {}
 
   @Get()
   @PreAuthorized(PERMISSIONS.READ_PERMISSION)
@@ -24,7 +37,9 @@ export class PermissionController {
   @Get(':id')
   @PreAuthorized(PERMISSIONS.READ_PERMISSION)
   @HttpCode(HttpStatus.OK)
-  async getOne(@Param('id', ParseIntPipe) id: number): Promise<PermissionResponseDto> {
+  async getOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PermissionResponseDto> {
     const permission = await this.service.findOneBy({ filters: { id } });
     return PermissionMapper.toResponse(permission);
   }

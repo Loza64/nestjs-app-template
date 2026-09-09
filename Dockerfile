@@ -15,7 +15,7 @@ RUN pnpm test
 
 RUN pnpm build
 
-RUN pnpm prune --prod
+RUN pnpm prune --prod --ignore-scripts
 
 FROM node:22-alpine AS runner
 

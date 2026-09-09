@@ -13,7 +13,7 @@ export class RefreshTokenService {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepo: Repository<RefreshToken>,
-  ) { }
+  ) {}
 
   private hash(token: string): string {
     return createHash('sha256').update(token).digest('hex');
@@ -33,7 +33,9 @@ export class RefreshTokenService {
     return refreshTokenValue;
   }
 
-  async rotate(incomingToken: string): Promise<{ refreshToken: string; user: User }> {
+  async rotate(
+    incomingToken: string,
+  ): Promise<{ refreshToken: string; user: User }> {
     const hashed = this.hash(incomingToken);
     const stored = await this.refreshTokenRepo.findOne({
       where: { token: hashed },
@@ -46,7 +48,9 @@ export class RefreshTokenService {
 
     if (stored.used || stored.revoked) {
       await this.revokeFamily(stored.familyId);
-      throw new UnauthorizedException('Reuso de refresh token detectado. Todas las sesiones fueron revocadas.');
+      throw new UnauthorizedException(
+        'Reuso de refresh token detectado. Todas las sesiones fueron revocadas.',
+      );
     }
 
     if (stored.expiresAt < new Date()) {
@@ -67,7 +71,9 @@ export class RefreshTokenService {
 
   async revoke(incomingToken: string): Promise<void> {
     const hashed = this.hash(incomingToken);
-    const stored = await this.refreshTokenRepo.findOne({ where: { token: hashed } });
+    const stored = await this.refreshTokenRepo.findOne({
+      where: { token: hashed },
+    });
     if (stored) {
       await this.revokeFamily(stored.familyId);
     }

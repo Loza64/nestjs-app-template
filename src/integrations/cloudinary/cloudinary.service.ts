@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CloudinaryService as Service, CloudinaryUploadOptions } from '@scwar/nestjs-cloudinary';
+import {
+  CloudinaryService as Service,
+  CloudinaryUploadOptions,
+} from '@scwar/nestjs-cloudinary';
 
 @Injectable()
 export class CloudinaryService {
-  constructor(private readonly cloudinary: Service) { }
+  constructor(private readonly cloudinary: Service) {}
 
   upload(filePath: Buffer, config: CloudinaryUploadOptions) {
     return this.cloudinary.upload(filePath, config);

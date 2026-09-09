@@ -29,16 +29,19 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly cryptoService: CryptoService,
     private readonly refreshTokenService: RefreshTokenService,
-  ) { }
+  ) {}
 
   private signToken(userId: number): string {
     return this.jwtService.sign<JwtPayload>({ sub: userId });
   }
 
   async signUp(data: SignUpDto): Promise<AuthResponseDto> {
-    const existing = await this.repo.findOne({ where: [{ username: data.username }, { email: data.email }] });
+    const existing = await this.repo.findOne({
+      where: [{ username: data.username }, { email: data.email }],
+    });
 
-    if (existing) throw new ConflictException('Username o email ya están en uso');
+    if (existing)
+      throw new ConflictException('Username o email ya están en uso');
 
     const hashedPassword = await this.cryptoService.encrypt(data.password);
 
@@ -76,7 +79,10 @@ export class AuthService {
       throw new UnauthorizedException('Account is blocked');
     }
 
-    const validPassword = await this.cryptoService.compare(password, user.password);
+    const validPassword = await this.cryptoService.compare(
+      password,
+      user.password,
+    );
 
     if (!validPassword) {
       throw new UnauthorizedException('Usuario o contraseña incorrectos');
@@ -92,7 +98,8 @@ export class AuthService {
   }
 
   async refresh(incomingToken: string): Promise<AuthResponseDto> {
-    const { refreshToken, user } = await this.refreshTokenService.rotate(incomingToken);
+    const { refreshToken, user } =
+      await this.refreshTokenService.rotate(incomingToken);
 
     return {
       token: this.signToken(user.id),
@@ -113,7 +120,10 @@ export class AuthService {
   }
 
   async updateProfile(id: number, data: UpdateProfileDto): Promise<User> {
-    const profile = await this.repo.findOne({ where: { id }, relations: { role: true } });
+    const profile = await this.repo.findOne({
+      where: { id },
+      relations: { role: true },
+    });
     if (!profile) throw new NotFoundException('Profile not found');
 
     Object.assign(profile, data);
@@ -121,11 +131,18 @@ export class AuthService {
   }
 
   async updatePassword(id: number, data: ChangePasswordDto): Promise<User> {
-    const user = await this.repo.findOne({ where: { id }, relations: { role: true, photo: true } });
+    const user = await this.repo.findOne({
+      where: { id },
+      relations: { role: true, photo: true },
+    });
     if (!user) throw new NotFoundException('User not found');
 
-    const isValid = await this.cryptoService.compare(data.currentPassword, user.password);
-    if (!isValid) throw new BadRequestException('La contraseña actual es incorrecta');
+    const isValid = await this.cryptoService.compare(
+      data.currentPassword,
+      user.password,
+    );
+    if (!isValid)
+      throw new BadRequestException('La contraseña actual es incorrecta');
 
     user.password = await this.cryptoService.encrypt(data.newPassword);
     return this.repo.save(user);

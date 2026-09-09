@@ -19,7 +19,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(20)
-  @Matches(/^[a-zA-Z0-9_]+$/, { message: 'username solo puede contener letras, números y guion bajo' })
+  @Matches(/^[a-zA-Z0-9_]+$/, {
+    message: 'username solo puede contener letras, números y guion bajo',
+  })
   username?: string;
 
   @IsString() @IsNotEmpty() name?: string;
@@ -36,4 +38,6 @@ export class CreateUserDto {
   @ValidateNested() @Type(() => IdDto) @IsOptional() photo?: IdDto;
 }
 
-export class UpdateUserDto extends PartialType(OmitType(CreateUserDto, ['password'] as const)) { }
+export class UpdateUserDto extends PartialType(
+  OmitType(CreateUserDto, ['password'] as const),
+) {}

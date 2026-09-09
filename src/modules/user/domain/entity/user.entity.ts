@@ -1,18 +1,15 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  OneToOne,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { BaseEntity } from 'src/common/entity/base';
 import { Role } from 'src/modules/role/domain/entity/role.entity';
 import { Upload } from 'src/modules/upload/domain/entity/upload.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
-
-  @OneToOne(() => Upload, (upload) => upload.user, { nullable: true, eager: false, onDelete: 'SET NULL' })
+  @OneToOne(() => Upload, (upload) => upload.user, {
+    nullable: true,
+    eager: false,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'photo_id' })
   photo: Upload | null = null;
 

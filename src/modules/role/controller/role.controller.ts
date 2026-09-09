@@ -25,7 +25,7 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 
 @Controller('roles')
 export class RoleController {
-  constructor(private readonly rolesService: RoleService) { }
+  constructor(private readonly rolesService: RoleService) {}
 
   @Get()
   @PreAuthorized(PERMISSIONS.READ_ROLE)
@@ -53,8 +53,13 @@ export class RoleController {
   @Get(':id')
   @PreAuthorized(PERMISSIONS.READ_ROLE)
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
-    const role = await this.rolesService.findOneBy({ filters: { id }, relations: { permissions: true } });
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<RoleResponseDto> {
+    const role = await this.rolesService.findOneBy({
+      filters: { id },
+      relations: { permissions: true },
+    });
     return RoleMapper.toResponse(role);
   }
 
@@ -68,7 +73,10 @@ export class RoleController {
   @Put(':id')
   @PreAuthorized(PERMISSIONS.UPDATE_ROLE)
   @HttpCode(HttpStatus.OK)
-  async update(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateRoleDto): Promise<RoleResponseDto> {
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateRoleDto,
+  ): Promise<RoleResponseDto> {
     const role = await this.rolesService.update({ id, data });
     return RoleMapper.toResponse(role);
   }
@@ -76,7 +84,9 @@ export class RoleController {
   @Delete(':id')
   @PreAuthorized(PERMISSIONS.DELETE_ROLE)
   @HttpCode(HttpStatus.OK)
-  async softDelete(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
+  async softDelete(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<RoleResponseDto> {
     const role = await this.rolesService.softDelete(id);
     return RoleMapper.toResponse(role);
   }
@@ -84,7 +94,9 @@ export class RoleController {
   @Patch(':id/restore')
   @PreAuthorized(PERMISSIONS.RESTORE_ROLE)
   @HttpCode(HttpStatus.OK)
-  async restore(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
+  async restore(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<RoleResponseDto> {
     const role = await this.rolesService.softRestore(id);
     return RoleMapper.toResponse(role);
   }

@@ -29,10 +29,13 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly usersService: UserService) { }
+  constructor(private readonly usersService: UserService) {}
 
   private preventSelfAction(id: number, profile: User) {
-    if (id === profile.id) throw new ForbiddenException('Cannot perform this action on your profile');
+    if (id === profile.id)
+      throw new ForbiddenException(
+        'Cannot perform this action on your profile',
+      );
   }
 
   @Get()
@@ -48,10 +51,14 @@ export class UserController {
 
     baseFilter.deletedAt = deleted ? Not(IsNull()) : IsNull();
 
-    const filters = parseSearch<User>(search, ['name', 'email', 'username', 'surname'], baseFilter);
+    const filters = parseSearch<User>(
+      search,
+      ['name', 'email', 'username', 'surname'],
+      baseFilter,
+    );
     const order = parseSort<User>({
       sort,
-      forbiddenFields: ['password']
+      forbiddenFields: ['password'],
     });
 
     const result = await this.usersService.findBy({
@@ -69,12 +76,14 @@ export class UserController {
   @Get(':id')
   @PreAuthorized(PERMISSIONS.READ_USER)
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserResponseDto> {
     const user = await this.usersService.findOneBy({
       filters: { id },
       relations: {
         role: true,
-        photo: true
+        photo: true,
       },
     });
     return UserMapper.toResponse(user);
@@ -107,7 +116,8 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async softDelete(
     @Param('id', ParseIntPipe) id: number,
-    @Profile() profile: User): Promise<UserResponseDto> {
+    @Profile() profile: User,
+  ): Promise<UserResponseDto> {
     this.preventSelfAction(id, profile);
     const user = await this.usersService.softDelete(id);
     return UserMapper.toResponse(user);
@@ -116,7 +126,9 @@ export class UserController {
   @Patch(':id/restore')
   @PreAuthorized(PERMISSIONS.RESTORE_USER)
   @HttpCode(HttpStatus.OK)
-  async restore(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
+  async restore(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserResponseDto> {
     const user = await this.usersService.softRestore(id);
     return UserMapper.toResponse(user);
   }

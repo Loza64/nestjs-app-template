@@ -10,6 +10,6 @@ import { UserController } from './controller/user.controller';
 @Module({
   imports: [TypeOrmModule.forFeature([User]), CryptoModule, UploadModule],
   providers: [UserService, CleanupOrphanPhotoInterceptor],
-  controllers: [UserController]
+  controllers: [UserController],
 })
-export class UserModule { }
+export class UserModule {}

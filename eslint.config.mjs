@@ -43,7 +43,7 @@ export default defineConfig(
       'no-promise-executor-return': 'error',
       'no-return-await': 'error',
       'no-throw-literal': 'error',
-      'prettier/prettier': 'off',
+      'prettier/prettier': 'error',
     },
   },
 );

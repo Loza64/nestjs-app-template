@@ -1,5 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
-import { FindOperator, FindOptionsOrder, FindOptionsWhere, ILike } from 'typeorm';
+import {
+  FindOperator,
+  FindOptionsOrder,
+  FindOptionsWhere,
+  ILike,
+} from 'typeorm';
 import { BaseEntity } from '../entity/base';
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -15,7 +20,10 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 function buildNested(path: string, value: unknown): Record<string, unknown> {
   return path
     .split('.')
-    .reduceRight<unknown>((acc, key) => ({ [key]: acc }), value) as Record<string, unknown>;
+    .reduceRight<unknown>((acc, key) => ({ [key]: acc }), value) as Record<
+    string,
+    unknown
+  >;
 }
 
 function deepMerge(
@@ -25,7 +33,10 @@ function deepMerge(
   const out: Record<string, unknown> = { ...target };
   for (const [key, value] of Object.entries(source)) {
     const existing = out[key];
-    out[key] = isPlainObject(existing) && isPlainObject(value) ? deepMerge(existing, value) : value;
+    out[key] =
+      isPlainObject(existing) && isPlainObject(value)
+        ? deepMerge(existing, value)
+        : value;
   }
   return out;
 }
@@ -39,7 +50,13 @@ export function parseSearch<TEntity>(
 
   const matcher = ILike(`%${search.trim()}%`);
 
-  return fields.map((field) => deepMerge(baseFilter, buildNested(field, matcher)) as FindOptionsWhere<TEntity>);
+  return fields.map(
+    (field) =>
+      deepMerge(
+        baseFilter,
+        buildNested(field, matcher),
+      ) as FindOptionsWhere<TEntity>,
+  );
 }
 
 const VALID_ORDERS = ['asc', 'desc'];
@@ -50,7 +67,11 @@ interface ParseSortOptions<T extends BaseEntity> {
   defaultSort?: FindOptionsOrder<T>;
 }
 
-export function parseSort<T extends BaseEntity>({ sort, forbiddenFields, defaultSort = {} }: ParseSortOptions<T>): FindOptionsOrder<T> {
+export function parseSort<T extends BaseEntity>({
+  sort,
+  forbiddenFields,
+  defaultSort = {},
+}: ParseSortOptions<T>): FindOptionsOrder<T> {
   if (!sort || sort.length === 0) return defaultSort;
 
   const sortData: FindOptionsOrder<T> = {};
@@ -58,9 +79,13 @@ export function parseSort<T extends BaseEntity>({ sort, forbiddenFields, default
   sort.forEach((item) => {
     const [field, order] = item.split(',');
     if (!field || !order || !VALID_ORDERS.includes(order.toLowerCase()))
-      throw new BadRequestException(`sort inválido: "${item}", formato esperado "campo,asc"`);
+      throw new BadRequestException(
+        `sort inválido: "${item}", formato esperado "campo,asc"`,
+      );
     if (forbiddenFields?.includes(field as keyof T))
-      throw new BadRequestException(`no se puede ordenar por el campo "${field}"`);
+      throw new BadRequestException(
+        `no se puede ordenar por el campo "${field}"`,
+      );
     sortData[field] = order.toUpperCase() as 'ASC' | 'DESC';
   });
 

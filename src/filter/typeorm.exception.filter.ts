@@ -24,7 +24,9 @@ export class TypeOrmExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Database query failed';
 
-    const driverError = exception.driverError as unknown as PostgresError | undefined;
+    const driverError = exception.driverError as unknown as
+      | PostgresError
+      | undefined;
 
     if (driverError) {
       switch (driverError.code) {

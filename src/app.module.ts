@@ -42,4 +42,4 @@ import { RefreshTokenModule } from './modules/refresh_token/refresh_token.module
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

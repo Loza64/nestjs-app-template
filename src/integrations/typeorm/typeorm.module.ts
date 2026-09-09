@@ -21,12 +21,16 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
           extra: {
             max: Number(config.get<string>('DB_POOL_MAX', '20')),
             min: Number(config.get<string>('DB_POOL_MIN', '5')),
-            connectionTimeoutMillis: Number(config.get<string>('DB_POOL_ACQUIRE_TIMEOUT', '3000')),
-            idleTimeoutMillis: Number(config.get<string>('DB_POOL_IDLE_TIMEOUT', '30000')),
+            connectionTimeoutMillis: Number(
+              config.get<string>('DB_POOL_ACQUIRE_TIMEOUT', '3000'),
+            ),
+            idleTimeoutMillis: Number(
+              config.get<string>('DB_POOL_IDLE_TIMEOUT', '30000'),
+            ),
           },
         };
       },
     }),
-  ]
+  ],
 })
-export class TypeormModule { }
+export class TypeormModule {}

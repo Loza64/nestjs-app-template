@@ -24,7 +24,7 @@ import { PERMISSIONS } from 'src/common/constants/permissions';
 
 @Controller('uploads')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) { }
+  constructor(private readonly uploadService: UploadService) {}
 
   @Post()
   @PreAuthorized(PERMISSIONS.CREATE_UPLOAD)
@@ -74,7 +74,10 @@ export class UploadController {
   @PreAuthorized(PERMISSIONS.READ_UPLOAD)
   @HttpCode(HttpStatus.OK)
   async findAll(@Query('page') page = 1, @Query('size') size = 10) {
-    const result = await this.uploadService.findBy({ page: Number(page), size: Number(size) });
+    const result = await this.uploadService.findBy({
+      page: Number(page),
+      size: Number(size),
+    });
     return UploadMapper.toPaginatedResponse(result);
   }
 }

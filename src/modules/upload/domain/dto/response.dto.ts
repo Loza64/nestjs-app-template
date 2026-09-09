@@ -9,5 +9,7 @@ export class UploadResponseDto {
   height!: number | null;
   bytes!: number | null;
   tags!: string[] | null;
-  eager!: { url: string; secureUrl: string; width: number; height: number }[] | null;
+  eager!:
+    | { url: string; secureUrl: string; width: number; height: number }[]
+    | null;
 }

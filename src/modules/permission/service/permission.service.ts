@@ -1,7 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Permission } from '../domain/entity/permission.entity';
-import { DeepPartial, FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  DeepPartial,
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { PaginationParser } from 'src/common/parser/pagination.parser';
 import { paginate } from 'nestjs-typeorm-paginate';
 
@@ -10,7 +16,7 @@ export class PermissionService {
   constructor(
     @InjectRepository(Permission)
     private readonly permissionRepo: Repository<Permission>,
-  ) { }
+  ) {}
 
   async create(data: DeepPartial<Permission>): Promise<Permission> {
     await this.permissionRepo.upsert(data, ['name']);
@@ -23,7 +29,13 @@ export class PermissionService {
     await this.permissionRepo.upsert(data, ['name']);
   }
 
-  async update({ id, data, }: { id: number; data: DeepPartial<Permission> }): Promise<Permission> {
+  async update({
+    id,
+    data,
+  }: {
+    id: number;
+    data: DeepPartial<Permission>;
+  }): Promise<Permission> {
     const permission = await this.findOneBy({ filters: { id } });
     Object.assign(permission, data);
     return this.permissionRepo.save(permission);
@@ -52,13 +64,20 @@ export class PermissionService {
     const result = await paginate<Permission>(
       this.permissionRepo,
       { page: params.page, limit: params.size },
-      { where: params.filters, relations: params.relations, order: params.order, withDeleted: params.withDeleted },
+      {
+        where: params.filters,
+        relations: params.relations,
+        order: params.order,
+        withDeleted: params.withDeleted,
+      },
     );
 
-    return new PaginationParser<Permission>(result)
+    return new PaginationParser<Permission>(result);
   }
 
-  async count(filters?: FindOptionsWhere<Permission> | FindOptionsWhere<Permission>[]): Promise<number> {
+  async count(
+    filters?: FindOptionsWhere<Permission> | FindOptionsWhere<Permission>[],
+  ): Promise<number> {
     return this.permissionRepo.count({ where: filters });
   }
 }
