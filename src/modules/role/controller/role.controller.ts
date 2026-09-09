@@ -31,7 +31,7 @@ export class RoleController {
   @PreAuthorized(PERMISSIONS.READ_ROLE)
   @HttpCode(HttpStatus.OK)
   async findAll(@Query() query: BaseQuerys) {
-    const { page, size, deleted, search, sort } = query;
+    const { page, pageSize: size, deleted, search, sort } = query;
 
     const baseFilter: FindOptionsWhere<Role> = {};
     baseFilter.deletedAt = deleted ? Not(IsNull()) : IsNull();

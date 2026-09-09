@@ -42,7 +42,15 @@ export class UserController {
   @PreAuthorized(PERMISSIONS.READ_USER)
   @HttpCode(HttpStatus.OK)
   async findAll(@Query() query: querys) {
-    const { page = 1, size = 20, search, blocked, role, deleted, sort } = query;
+    const {
+      page = 1,
+      pageSize: size = 20,
+      search,
+      blocked,
+      role,
+      deleted,
+      sort,
+    } = query;
 
     const baseFilter: FindOptionsWhere<User> = {
       ...(blocked !== undefined ? { blocked } : {}),

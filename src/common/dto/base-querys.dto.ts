@@ -39,7 +39,7 @@ export default class BaseQuerys {
   @Type(() => Number)
   @Min(1)
   @Max(500)
-  size: number = 50;
+  pageSize: number = 50;
 
   @IsOptional()
   @IsString()
