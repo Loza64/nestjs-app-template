@@ -1,479 +1,236 @@
-# Documentación técnica del proyecto
+# NestJS App Template
 
-## Resumen general
+> Backend modular para construir APIs seguras con NestJS, PostgreSQL y TypeORM.
 
-Este proyecto es una plantilla backend de **NestJS** construida con **TypeScript**. Está diseñada como una API modular que incluye:
+Una base de proyecto pensada para equipos que necesitan arrancar rapido sin sacrificar estructura: autenticacion JWT, autorizacion por permisos, CRUD modular, subida de archivos a Cloudinary, validacion global y seeders idempotentes al iniciar la aplicacion.
 
-- Autenticación con **JWT**
-- Autorización por **roles y permisos**
-- Integración con **Cloudinary** para subida de archivos
-- Persistencia en **PostgreSQL** mediante **TypeORM**
-- Manejo de usuarios, roles, permisos y archivos
-- Validaciones básicas de carga de archivos y gestión de datos
+## Por que este template
 
-## Tecnologías usadas
+- **Modular por dominio:** cada bounded context mantiene controladores, servicios, DTOs, entidades y seeders cerca de su responsabilidad.
+- **Seguro por defecto:** `JwtAuthGuard` es global; las rutas publicas se declaran de forma explicita con `@Public()`.
+- **Autorizacion extensible:** los permisos se expresan con `@PreAuthorized()` y se evaluan mediante `PermissionsGuard`.
+- **Persistencia pragmatica:** TypeORM + PostgreSQL, entidades cargadas automaticamente y soft delete en la entidad base.
+- **Operable desde el primer arranque:** roles, permisos y usuario `SUPER_ADMIN` se inicializan de forma idempotente.
+- **Listo para contenedores:** imagen multi-stage basada en Node 22 Alpine.
 
-- Node.js
-- TypeScript
-- NestJS
-- pnpm
-- PostgreSQL
-- TypeORM
-- JSON Web Tokens (JWT)
-- Passport JWT
-- Bcrypt
-- Cloudinary
-- class-transformer
-- class-validator
-- Jest
-- ESLint + Prettier
-- RxJS
+## Stack
 
-## Archivos principales de configuración
+| Capa | Tecnologia |
+| --- | --- |
+| Runtime | Node.js 22, TypeScript |
+| Framework | NestJS 11 |
+| API | Express, Swagger |
+| Datos | PostgreSQL, TypeORM 0.3 |
+| Seguridad | JWT, Passport, bcrypt |
+| Archivos | Cloudinary, Multer |
+| Validacion | class-validator, class-transformer |
+| Calidad | Jest, ESLint, Prettier |
+| Package manager | pnpm |
 
-- `package.json` — dependencias, scripts y configuración de Jest
-- `tsconfig.json` — configuración de compilación TypeScript
-- `nest-cli.json` — configuración de Nest CLI
-- `README.md` — guía básica generada por el starter de NestJS
-- `pnpm-lock.yaml` — bloqueo de paquetes de pnpm
+## Requisitos
 
-## Estructura del proyecto
+- Node.js 22 o superior
+- pnpm habilitado mediante Corepack
+- PostgreSQL accesible desde la aplicacion
+- Credenciales de Cloudinary si se utilizaran uploads
 
-### Raíz
+Habilita pnpm si tu instalacion aun no lo tiene:
 
-- `src/app.module.ts` — módulo raíz de la aplicación
-- `src/app.controller.ts` — controlador de ejemplo
-- `src/app.service.ts` — servicio de ejemplo
-- `src/main.ts` — punto de entrada de la aplicación
-
-### Common
-
-- `src/common/entity/base.ts` — clase base para entidades con campos comunes (`id`, `createdAt`, `updatedAt`, `deletedAt`, `deleted`)
-- `src/common/decorators/profile.ts` — decorador personalizado `@Profile()` para inyectar el usuario autenticado en un controlador
-- `src/common/interceptors/upload/upload.interceptor.ts` — interceptor de NestJS para validar tipos de archivo al subir
-- `src/common/parser/pagination.parser.ts` — parser para respuesta paginada usando `nestjs-typeorm-paginate`
-- `src/common/constants/mime-types.ts` — lista de tipos MIME permitidos para upload
-- `src/common/service/crud.service.ts` — interfaz base de servicio CRUD (usada por `UserService`)
-
-### Integraciones
-
-- `src/integrations/crypto/crypto.service.ts` — servicio para encriptar y comparar contraseñas con bcrypt
-- `src/integrations/crypto/crypto.module.ts` — módulo de exportación del servicio de crypto
-- `src/integrations/cloudinary/cloudinary.service.ts` — servicio wrapper para subir y eliminar archivos en Cloudinary
-- `src/integrations/cloudinary/cloudinary.module.ts` — módulo de integración con Cloudinary
-
-### Seguridad y reglas
-
-- `src/security/jwt/jwt.guard.ts` — guard global que valida JWT
-- `src/security/permission/permissions.guard.ts` — guard global que valida permisos
-
-### Módulos de dominio
-
-- `src/modules/auth/` — login, registro y perfil de usuario
-- `src/modules/user/` — gestión de usuarios CRUD
-- `src/modules/role/` — gestión de roles y asociación con permisos
-- `src/modules/permission/` — gestión de permisos y seeding
-- `src/modules/upload/` — subida y administración de archivos en Cloudinary
-
-## Descripción de módulos y responsabilidades
-
-### `src/app.module.ts`
-
-- Carga `ConfigModule` en modo global para variables de entorno.
-- Conecta a PostgreSQL con `TypeOrmModule.forRootAsync`.
-- Registra `JwtModule` global usando configuración de `ConfigService`.
-- Importa módulos centrales: `CloudinaryModule`, `AuthModule`, `UserModule`, `RoleModule`, `PermissionModule`, `UploadModule`, `UploadInterceptorModule`, `CryptoModule`.
-- Declara el guard global `JwtAuthGuard` mediante `APP_GUARD`.
-
-### Autenticación y sesión
-
-#### `AuthModule`
-
-- `AuthController` expone:
-  - `POST /api/auth/login`
-  - `POST /api/auth/signup`
-  - `GET /api/auth/profile`
-- `AuthService` realiza:
-  - login de usuario
-  - comparación de contraseña con `CryptoService`
-  - creación de usuario con password hasheado
-  - generación de token JWT
-  - lectura de perfil con roles y permisos
-
-#### `JwtAuthGuard`
-
-- Valida la presencia del header `Authorization: Bearer ...`
-- Verifica el token JWT con `JwtService`
-- Consulta el usuario activo y detecta cuentas bloqueadas o eliminadas
- - Todos los endpoints son privados por defecto mediante `JwtAuthGuard`.
- - `@Public()` permite explícitamente un endpoint sin autenticación.
- - `@PreAuthorized(PERMISSIONS.READ_PERMISSION)` exige JWT y la clave indicada en el permiso.
-
-### Gestión de usuarios
-
-#### `UserModule`
-
-- Exposición de CRUD de usuarios via `UserController`.
-- Control de creación, actualización, eliminación y búsqueda.
-- Prevención de acciones contra el propio usuario en rutas sensibles.
-
-#### `UserController`
-
-- `GET /api/users` — lista usuarios con filtros y paginación.
-- `GET /api/users/:id` — obtiene usuario por ID.
-- `POST /api/users` — crea usuario.
-- `PUT /api/users/:id` — actualiza usuario.
-- `DELETE /api/users/:id` — elimina usuario.
-
-#### `UserService`
-
-- Usa `nestjs-typeorm-paginate` para paginar resultados.
-- Crea y actualiza roles asociados correctamente.
-- Implementa métodos CRUD genéricos.
-
-### Roles y permisos
-
-#### `RoleModule`
-
-- `RoleController` y `RoleService` gestionan roles.
-- `Role` tiene relación ManyToMany con `Permission`.
-
-#### `PermissionModule`
-
-- `PermissionController` y `PermissionService` gestionan permisos.
-- Incluye `PermissionsSeeder` para poblar permisos iniciales.
-- Importa `DiscoveryModule` para descubrir los permisos declarados con `@PreAuthorized()`.
-
-#### Entidades principales
-
-- `Role` (`src/modules/role/domain/entity/role.entity.ts`):
-  - `name`
-  - `description`
-  - relación ManyToMany con `Permission`
-
-- `Permission` (`src/modules/permission/domain/entity/permission.entity.ts`):
-  - `name`
-  - `title`
-
-### Subida de archivos y Cloudinary
-
-#### `UploadModule`
-
-- Gestiona endpoints de subida de archivos.
-- Usa interceptor `UploadInterceptor` para validar tipo y existencia.
-- Usa `CloudinaryService` para operaciones remotas.
-
-#### `UploadController`
-
-- `POST /api/uploads` — sube un archivo simple.
-- `POST /api/uploads/many` — sube múltiples archivos.
-- `DELETE /api/uploads/:id` — elimina un archivo.
-- `GET /api/uploads/:id` — obtiene metadata de un archivo.
-- `GET /api/uploads` — lista archivos con paginación.
-
-#### `UploadService`
-
-- Determina el `resource_type` según el MIME type:
-  - imágenes -> `image`
-  - video -> `video`
-  - PDF -> `raw`
-- Guarda metadata de Cloudinary en la entidad `Upload`.
-- Elimina el archivo remoto antes de borrar el registro.
-- Ofrece búsqueda paginada con `PaginationParser`.
-
-#### `Upload` entity
-
-- Campos almacenados:
-  - `publicId`
-  - `url`
-  - `secureUrl`
-  - `resourceType`
-  - `format`
-  - `originalFilename`
-  - `width`, `height`, `bytes`
-  - `tags`
-  - `placeholder`
-
-#### `UploadInterceptor`
-
-- Valida que exista al menos un archivo.
-- Comprueba que el MIME type sea válido usando `allowedMimeTypes`.
-- Lanza `BadRequestException` en caso de datos inválidos.
-
-### Integración con Cloudinary
-
-- `CloudinaryModule` carga configuración asíncrona desde `ConfigService`.
-- Variables esperadas:
-  - `CLOUDINARY_CLOUD_NAME`
-  - `CLOUDINARY_API_KEY`
-  - `CLOUDINARY_API_SECRET`
-- `CloudinaryService` expone:
-  - `upload(filePath, config)`
-  - `destroy(public_id)`
-
-### Seguridad de contraseñas
-
-- `CryptoService` usa `bcrypt` con `saltRounds = 10`.
-- Métodos:
-  - `encrypt(password)`
-  - `compare(password, hash)`
-
-### Paginación
-
-- `PaginationParser` transforma la respuesta de `nestjs-typeorm-paginate`.
-- `PaginationMeta` normaliza metadata:
-  - `page`
-  - `pageSize`
-  - `pageCount`
-  - `total`
-
-## Dependencias definidas en `package.json`
-
-### Dependencias de producción
-
-- `@nestjs/common`
-- `@nestjs/config`
-- `@nestjs/core`
-- `@nestjs/jwt`
-- `@nestjs/passport`
-- `@nestjs/platform-express`
-- `@nestjs/typeorm`
-- `typeorm`
-
-### Dependencias de desarrollo
-
-- `@nestjs/cli`
-- `@nestjs/schematics`
-- `@nestjs/testing`
-- `@scwar/nestjs-cloudinary`
-- `@types/bcrypt`
-- `@types/express`
-- `@types/jest`
-- `@types/multer`
-- `@types/node`
-- `@types/supertest`
-- `bcrypt`
-- `class-transformer`
-- `class-validator`
-- `eslint`
-- `eslint-config-prettier`
-- `eslint-plugin-prettier`
-- `globals`
-- `jest`
-- `multer`
-- `nestjs-typeorm-paginate`
-- `passport`
-- `passport-jwt`
-- `pg`
-- `prettier`
-- `reflect-metadata`
-- `remove`
-- `rxjs`
-- `source-map-support`
-- `supertest`
-- `ts-jest`
-- `ts-loader`
-- `ts-node`
-- `tsconfig-paths`
-- `typescript`
-- `typescript-eslint`
-
-## Scripts disponibles
-
-- `pnpm install`
-- `pnpm run build`
-- `pnpm run start`
-- `pnpm run start:dev`
-- `pnpm run start:debug`
-- `pnpm run start:prod`
-- `pnpm run lint`
-- `pnpm run format`
-- `pnpm run test`
-- `pnpm run test:watch`
-- `pnpm run test:cov`
-- `pnpm run test:e2e`
-
-## Configuración de TypeScript
-
-- `target`: `ES2023`
-- `module`: `nodenext`
-- `moduleResolution`: `nodenext`
-- `emitDecoratorMetadata`: `true`
-- `experimentalDecorators`: `true`
-- `declaration`: `true`
-- `sourceMap`: `true`
-- `outDir`: `./dist`
-- `strictNullChecks`: `true`
-- `skipLibCheck`: `true`
-- `forceConsistentCasingInFileNames`: `true`
-
-## Documentación del código: cómo crear un servicio
-
-El proyecto incluye un patrón de servicio común basado en la interfaz `ICrudService<T>` que define los métodos CRUD estándar y paginación.
-
-- `src/common/service/crud.service.ts` define `ICrudService<T>`.
-- `src/common/entity/base.ts` define `BaseEntity` con campos comunes como `id`, `createdAt`, `updatedAt`, `deletedAt` y `deleted`.
-- `src/common/parser/pagination.parser.ts` convierte la salida de `nestjs-typeorm-paginate` en una respuesta uniforme.
-
-### Ejemplo de entidad base
-
-```ts
-import { Entity, Column } from 'typeorm';
-import { BaseEntity } from 'src/common/entity/base';
-
-@Entity('products')
-export class Product extends BaseEntity {
-  @Column({ type: 'varchar', nullable: false })
-  name: string = '';
-
-  @Column({ type: 'text', nullable: true })
-  description?: string;
-}
+```bash
+corepack enable
 ```
 
-### Ejemplo de service siguiendo el patrón
+## Inicio local
 
-```ts
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DeepPartial, FindOptionsWhere, FindOptionsRelations } from 'typeorm';
-import { paginate } from 'nestjs-typeorm-paginate';
-import { ICrudService } from 'src/common/service/crud.service';
-import { PaginationParser } from 'src/common/parser/pagination.parser';
-import { Product } from './domain/entity/product.entity';
+1. Instala dependencias:
 
-@Injectable()
-export class ProductService implements ICrudService<Product> {
-  constructor(
-    @InjectRepository(Product)
-    private readonly productRepo: Repository<Product>,
-  ) {}
+   ```bash
+   pnpm install
+   ```
 
-  async create(data: DeepPartial<Product>): Promise<Product> {
-    const entity = this.productRepo.create(data);
-    return this.productRepo.save(entity);
-  }
+2. Crea `.env` en la raiz. Como minimo:
 
-  async update({ id, data }: { id: number; data: DeepPartial<Product> }): Promise<Product> {
-    const entity = await this.productRepo.findOneBy({ id });
-    if (!entity) throw new NotFoundException('Product not found');
-    Object.assign(entity, data);
-    return this.productRepo.save(entity);
-  }
+   ```env
+   NODE_ENV=develop
+   PORT=3000
 
-  async delete(id: number): Promise<Product> {
-    const entity = await this.productRepo.findOneBy({ id });
-    if (!entity) throw new NotFoundException('Product not found');
-    return this.productRepo.remove(entity);
-  }
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USER=postgres
+   DB_PASSWORD=change-me
+   DB_NAME=nestjs
 
-  async findOneBy(params: { filters: FindOptionsWhere<Product> | FindOptionsWhere<Product>[]; relations?: FindOptionsRelations<Product>; }): Promise<Product> {
-    const product = await this.productRepo.findOne({ where: params.filters, relations: params.relations });
-    if (!product) throw new NotFoundException('Product not found');
-    return product;
-  }
+   JWT_SECRET=change-me-with-a-long-random-value
 
-  async findBy(params: { filters: FindOptionsWhere<Product> | FindOptionsWhere<Product>[]; relations?: FindOptionsRelations<Product>; page: number; size: number; }): Promise<PaginationParser<Product>> {
-    const result = await paginate(this.productRepo, { page: params.page, limit: params.size }, { where: params.filters, relations: params.relations });
-    return new PaginationParser(result);
-  }
+   CLOUDINARY_CLOUD_NAME=your-cloud-name
+   CLOUDINARY_API_KEY=your-api-key
+   CLOUDINARY_API_SECRET=your-api-secret
 
-  async count(filters?: FindOptionsWhere<Product> | FindOptionsWhere<Product>[]): Promise<number> {
-    return this.productRepo.count({ where: filters });
-  }
-}
+   SUPER_ADMIN_EMAIL=admin@example.com
+   SUPER_ADMIN_PASSWORD=change-me
+   SUPER_ADMIN_USERNAME=admin
+   ```
+
+3. Inicia el servidor en modo desarrollo:
+
+   ```bash
+   pnpm start:dev
+   ```
+
+La API queda disponible en `http://localhost:3000/api`.
+
+Cuando `NODE_ENV=develop`, Swagger se publica en `http://localhost:3000/docs`.
+
+## Docker
+
+El `docker-compose.yaml` levanta solamente la API y espera una red Docker externa llamada `postgres_network`.
+
+```bash
+docker network create postgres_network
+docker compose up -d --build
 ```
 
-### Cómo registrar el servicio en el módulo
+El contenedor recibe las variables desde `.env`. Para usar PostgreSQL en otro contenedor, conectalo tambien a `postgres_network` y usa como `DB_HOST` el nombre del servicio, no `localhost`.
 
-```ts
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductService } from './services/product/product.service';
-import { Product } from './domain/entity/product.entity';
+La imagen ejecuta esta secuencia durante el build:
 
-@Module({
-  imports: [TypeOrmModule.forFeature([Product])],
-  providers: [ProductService],
-  exports: [ProductService],
-})
-export class ProductModule {}
+```text
+pnpm install --frozen-lockfile -> pnpm test -> pnpm build -> pnpm prune --prod
 ```
 
-Este patrón es similar al de `UserService` en el proyecto. Mantiene la lógica de datos separada del controlador y centraliza las operaciones con TypeORM.
+## Configuracion
 
-## Recomendaciones para desarrolladores
+| Variable | Uso |
+| --- | --- |
+| `NODE_ENV` | `develop` habilita Swagger; `production` desactiva `synchronize` y activa SSL de PostgreSQL. |
+| `PORT` | Puerto HTTP de la API. |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Conexion PostgreSQL. |
+| `DB_POOL_MAX`, `DB_POOL_MIN` | Limites del pool de conexiones. |
+| `DB_POOL_ACQUIRE_TIMEOUT`, `DB_POOL_IDLE_TIMEOUT` | Timeouts del pool en milisegundos. |
+| `JWT_SECRET` | Secreto utilizado para firmar tokens. |
+| `CORS_ORIGINS` | Origenes permitidos separados por comas. |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Conexion con Cloudinary. |
+| `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`, `SUPER_ADMIN_USERNAME` | Credenciales del usuario inicial. |
 
-- Revisar el uso de `synchronize: true` en `TypeOrmModule.forRootAsync`; sólo debe usarse en desarrollo.
-- Añadir un módulo de configuración `.env.example` y validación de variables.
-- Proteger la eliminación de archivos con auditoría si se requiere histórico.
-- Añadir validaciones con DTOs usando `class-validator` en los controladores de usuario, rol y permiso.
-- Centralizar las claves de permisos y roles en un servicio de autorización más completo si el proyecto crece.
+No guardes secretos reales en el repositorio. Usa un gestor de secretos en CI/CD y genera un `JWT_SECRET` aleatorio y largo para cada entorno.
 
-## Notas importantes
+## Inicializacion de datos
 
-- La seguridad usa claves explícitas declaradas con `@PreAuthorized()`; `Permission` solo almacena `name` y `title`.
-- El guard JWT revisa `request.route.path` y compara con reglas de permiso.
-- El decorador `@Profile()` asume que el `JwtAuthGuard` ya inyectó `request.user`.
-- `UploadInterceptor` usa tipos MIME configurados en `src/common/constants/mime-types.ts`.
+Los seeders se ejecutan durante `onApplicationBootstrap`:
 
-## APIs expuestas principales
+1. `PermissionsSeeder` registra los permisos definidos en `src/common/constants/permissions.ts`.
+2. `RolesSeeder` registra `SUPER_ADMIN` y `ADMIN` mediante `upsert`.
+3. `SuperAdminSeeder` espera explicitamente a `RolesSeeder`, verifica si ya existe un usuario con rol `SUPER_ADMIN` y, si no existe, crea el usuario configurado en `.env` con la contrasena hasheada mediante bcrypt.
+
+El proceso es idempotente. Si ya existe un super-admin, un usuario con el mismo email o username, o faltan las variables del super-admin, el seeder no sobrescribe datos existentes.
+
+> En produccion `synchronize` esta desactivado. Usa migraciones gestionadas para evolucionar el esquema.
+
+## API principal
+
+Todas las rutas usan el prefijo `/api`.
 
 ### Auth
 
-- `POST /api/auth/login`
-- `POST /api/auth/signup`
-- `GET /api/auth/profile`
+| Metodo | Ruta | Acceso |
+| --- | --- | --- |
+| `POST` | `/auth/login` | Publico |
+| `POST` | `/auth/signup` | Publico |
+| `POST` | `/auth/refresh` | Publico |
+| `POST` | `/auth/logout` | Publico |
+| `GET` | `/auth/profile` | JWT |
+| `PATCH` | `/auth/profile` | JWT |
+| `PATCH` | `/auth/profile/password` | JWT |
 
-### Users
+### Usuarios
 
-- `GET /api/users`
-- `GET /api/users/:id`
-- `POST /api/users`
-- `PUT /api/users/:id`
-- `DELETE /api/users/:id`
+| Metodo | Ruta | Acceso |
+| --- | --- | --- |
+| `GET` | `/users` | Permiso de lectura |
+| `GET` | `/users/:id` | Permiso de lectura |
+| `POST` | `/users` | Permiso de creacion |
+| `PUT` | `/users/:id` | Permiso de actualizacion |
+| `DELETE` | `/users/:id` | Permiso de eliminacion |
+| `PATCH` | `/users/:id/restore` | Permiso de restauracion |
+
+La lista de usuarios soporta paginacion, busqueda, ordenamiento, filtro por rol, estado bloqueado y registros eliminados.
+
+### Roles y permisos
+
+Los modulos `RoleModule` y `PermissionModule` gestionan el catalogo de roles y permisos. Un usuario `SUPER_ADMIN` supera la comprobacion de permisos; los demas usuarios necesitan que su rol tenga el permiso requerido.
 
 ### Uploads
 
-- `POST /api/uploads`
-- `POST /api/uploads/many`
-- `GET /api/uploads`
-- `GET /api/uploads/:id`
-- `DELETE /api/uploads/:id`
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| `POST` | `/uploads` | Sube un archivo |
+| `POST` | `/uploads/many` | Sube varios archivos |
+| `GET` | `/uploads` | Lista archivos con paginacion |
+| `GET` | `/uploads/:id` | Consulta metadata |
+| `DELETE` | `/uploads/:id` | Elimina archivo y metadata |
 
-## Archivo `script.sql`
+Los tipos MIME permitidos se centralizan en `src/common/constants/mime-types.ts`.
 
-El archivo `script.sql` se usa para inicializar datos básicos de autorización en la base de datos. Está diseñado para ejecutarse como un único script en PostgreSQL, dentro de una transacción.
+## Arquitectura
 
-- Inserta dos roles en la tabla `roles`: `ADMIN` y `USER`.
-- Asigna a `ADMIN` todos los permisos disponibles de la tabla `permissions`.
-- Asigna a `USER` únicamente los permisos con método HTTP `GET`.
-- Usa `ON CONFLICT` para que el script sea idempotente y no falle si ya existen los registros.
-
-Importante:
-
-- El script no crea usuarios nuevos.
-- La sentencia `UPDATE users` simplemente asigna `role_id` de administrador al usuario con `id = 1`, si ese usuario ya existe.
-- Si quieres usar otro usuario como administrador, modifica el valor de `u.id` antes de ejecutar el script.
-- Las consultas `SELECT` al final son opcionales y sirven para verificar los resultados.
-
-### Cómo ejecutar el script
-
-1. Conecta a tu base de datos PostgreSQL.
-2. Ejecuta el script con una herramienta SQL o desde la terminal:
-
-```sh
-psql -U <usuario> -d <base_de_datos> -f script.sql
+```text
+src/
+├── common/          Contratos, decoradores, parsers, helpers e interceptores compartidos
+├── filter/          Filtros globales para errores HTTP y TypeORM
+├── integrations/    Adaptadores de infraestructura: crypto, Cloudinary, JWT y TypeORM
+├── modules/         Dominios de negocio
+│   ├── auth/
+│   ├── permission/
+│   ├── refresh_token/
+│   ├── role/
+│   ├── upload/
+│   └── user/
+├── security/        Guards y estrategia JWT
+├── app.module.ts    Composicion de la aplicacion
+└── main.ts          Bootstrap HTTP, CORS, pipes, filtros y Swagger
 ```
 
-3. Si usas un cliente gráfico, simplemente abre `script.sql` y ejecútalo en la base de datos correspondiente.
+### Convenciones de seguridad
 
-### Por qué es útil
+- Las contrasenas nunca se persisten en texto plano; `CryptoService` usa bcrypt.
+- Los DTOs se validan mediante `ValidationPipe` global con `whitelist` y `forbidNonWhitelisted`.
+- Las respuestas de usuario pasan por `UserMapper`, evitando exponer directamente el modelo de persistencia.
+- La aplicacion rechaza origenes CORS que no esten en `CORS_ORIGINS`.
+- Los endpoints son privados por defecto.
 
-- Prepara el esquema de autorización necesario para que el guard de permisos funcione.
-- Permite probar acceso con un usuario administrador y un usuario estándar.
-- Facilita el desarrollo inicial sin tener que crear manualmente roles y asignaciones.
+## Scripts
 
-## Conclusión
+| Comando | Proposito |
+| --- | --- |
+| `pnpm start:dev` | Desarrollo con watch mode |
+| `pnpm start` | Arranque normal |
+| `pnpm start:prod` | Ejecuta `dist/main` |
+| `pnpm build` | Compila a `dist/` |
+| `pnpm test` | Ejecuta tests unitarios |
+| `pnpm test:watch` | Tests en modo watch |
+| `pnpm test:cov` | Tests con cobertura |
+| `pnpm test:e2e` | Tests end-to-end |
+| `pnpm lint` | Comprueba ESLint |
+| `pnpm lint:fix` | Corrige problemas automaticos de ESLint |
+| `pnpm format` | Formatea codigo fuente y tests |
 
-Este proyecto es una base sólida para un backend de administración de usuarios y archivos con permisos y roles. La documentación contiene la arquitectura principal, las tecnologías usadas, los módulos del dominio y las recomendaciones para desarrolladores.
+Antes de abrir un pull request:
+
+```bash
+pnpm lint
+pnpm test -- --runInBand
+pnpm build
+```
+
+## Produccion
+
+- Define `NODE_ENV=production`.
+- No uses `synchronize` para cambios de esquema.
+- Protege `.env` y las credenciales de Cloudinary, PostgreSQL y JWT.
+- Configura `CORS_ORIGINS` con dominios concretos, nunca con origenes innecesarios.
+- Ejecuta la imagen multi-stage generada por el `Dockerfile` con un usuario no root.
+- Revisa logs de arranque para confirmar que la conexion a PostgreSQL y los seeders finalizaron correctamente.
+
+## Licencia
+
+El proyecto se distribuye bajo la licencia indicada en [LICENSE.md](LICENSE.md).

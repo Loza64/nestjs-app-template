@@ -15,10 +15,25 @@ export class RolesSeeder implements OnApplicationBootstrap {
     private readonly repo: Repository<Role>,
   ) {}
 
+  async seed(): Promise<void> {
+    const existingRoles = await this.repo.find({ select: { name: true } });
+    const existingNames = new Set(existingRoles.map(({ name }) => name));
+    const missingRoles = DEFAULT_ROLES.filter(
+      ({ name }) => name && !existingNames.has(name),
+    );
+
+    if (missingRoles.length === 0) return;
+
+    await this.repo
+      .createQueryBuilder()
+      .insert()
+      .into(Role)
+      .values(missingRoles)
+      .orIgnore()
+      .execute();
+  }
+
   async onApplicationBootstrap(): Promise<void> {
-    await this.repo.upsert(DEFAULT_ROLES, {
-      conflictPaths: ['name'],
-      skipUpdateIfNoValuesChanged: true,
-    });
+    await this.seed();
   }
 }

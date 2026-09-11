@@ -26,7 +26,19 @@ export class PermissionService {
   }
 
   async upsert(data: DeepPartial<Permission>): Promise<void> {
-    await this.permissionRepo.upsert(data, ['name']);
+    const existingPermission = await this.permissionRepo.findOne({
+      where: { name: data.name as string },
+    });
+
+    if (existingPermission) return;
+
+    await this.permissionRepo
+      .createQueryBuilder()
+      .insert()
+      .into(Permission)
+      .values(data)
+      .orIgnore()
+      .execute();
   }
 
   async update({
