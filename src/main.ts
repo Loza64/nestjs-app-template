@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import CorsOrigin from './common/models/cors.config';
-import { ForbiddenException, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './filter/http.exception.filter';
 import { TypeOrmExceptionFilter } from './filter/typeorm.exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -11,27 +11,53 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  const allowedOrigins = configService
+  const isProduction = configService.get<string>('NODE_ENV') === 'production';
+  const configuredOrigins = configService
     .get<string>('CORS_ORIGINS', '')
     .split(',')
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
 
+  const allowedOrigins = new Set(
+    configuredOrigins.map((origin) => {
+      let parsedOrigin: URL;
+
+      try {
+        parsedOrigin = new URL(origin);
+      } catch {
+        throw new Error(`CORS_ORIGINS contiene un origen invalido: ${origin}`);
+      }
+
+      if (
+        !['http:', 'https:'].includes(parsedOrigin.protocol) ||
+        parsedOrigin.username ||
+        parsedOrigin.password ||
+        parsedOrigin.pathname !== '/' ||
+        parsedOrigin.search ||
+        parsedOrigin.hash ||
+        (isProduction && parsedOrigin.protocol !== 'https:')
+      ) {
+        throw new Error(`CORS_ORIGINS contiene un origen no seguro: ${origin}`);
+      }
+
+      return parsedOrigin.origin;
+    }),
+  );
+
   const originChecker: CorsOrigin = (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-      throw new ForbiddenException(`origin ${origin} not allowed`);
-    }
+
+    if (allowedOrigins.has(origin)) return callback(null, true);
+
+    return callback(new Error('Origin not allowed by CORS'), false);
   };
 
   app.enableCors({
     origin: originChecker,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization',
-    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false,
+    optionsSuccessStatus: 204,
   });
 
   app.useGlobalFilters(new HttpExceptionFilter(), new TypeOrmExceptionFilter());
